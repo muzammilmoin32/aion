@@ -16,6 +16,6 @@ GOOD TO KNOW
 - "Show what's behind it" (under the phone) opens the live trace of services called.
 - Light / dark follows your device setting.
 - Numbers, names and amounts with a dotted underline are sample values for this mockup.
-- The phone videos are free stock sample clips (Mixkit) standing in for the real
+- The phone videos are free stock sample clips (Pexels) standing in for the real
   screen recordings of each journey.
 - Arabic text is a draft for review by a native Saudi reader.

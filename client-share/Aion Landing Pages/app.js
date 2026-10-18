@@ -752,6 +752,7 @@ class Hero {
     if (this.isVideo()) {
       const v = j.video || {};
       this.media.poster = v.poster || '';
+      this.media.style.objectPosition = v.focus || '';
       this.media.innerHTML = [v.webm && `<source src="${v.webm}" type="video/webm">`, v.mp4 && `<source src="${v.mp4}" type="video/mp4">`].filter(Boolean).join('');
       this.media.load();
       return;

@@ -370,7 +370,7 @@ function thumb(c, i) {
   // Video version: built journeys loop their real (sample) clip; it only loads and plays on screen.
   const v = clipFor(c, i);
   if (v) {
-    return `<span class="thumb vthumb" aria-hidden="true"><video muted loop playsinline preload="none" poster="${v.poster}" data-src="${v.thumb}"></video><span class="vt-play">${ic('arrow')}</span></span>`;
+    return `<span class="thumb vthumb" aria-hidden="true"><video muted loop playsinline preload="none" poster="${v.poster}" data-src="${v.thumb}" style="object-position:${v.focus}"></video><span class="vt-play">${ic('arrow')}</span></span>`;
   }
   return `<span class="thumb t-${(i % 4) + 1}" aria-hidden="true">
     <span class="t-phone"><span class="t-top"><span class="t-ic">${ic(c.icon)}</span><i></i><i></i></span>
@@ -574,7 +574,7 @@ function openCard(id, rerender = false) {
     const clip = clipFor(c, CARDS.indexOf(c));
     const sv = $('.st-video', story);
     if (clip && sv) {
-      if (!sv.src.endsWith(clip.mp4.split('/').pop())) { sv.poster = clip.poster; sv.src = clip.mp4; }
+      if (!sv.src.endsWith(clip.mp4.split('/').pop())) { sv.poster = clip.poster; sv.src = clip.mp4; sv.style.objectPosition = clip.focus; }
       if (!reduceMotion.matches) sv.play().catch(() => {});
     }
     $('.st-notes', story).innerHTML = [c.preview && L(LS.ddPreview), c.tech && L(LS.ddTech), L(LS.ddVideo)].filter(Boolean).map((t) => `<p>${t}</p>`).join('');
