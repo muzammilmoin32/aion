@@ -1,0 +1,119 @@
+/* Landing C · "Editorial": calm and premium. Hero option 2 (serif), warm paper tones, numbered
+   sections with hairline rules, an index-style journey list, huge serif numerals.
+   Loaded after landing.css; only overrides. */
+
+.lp-c { --serif: "Fraunces", "Noto Naskh Arabic", Georgia, serif; --paper: #fbfaf6; --rule: color-mix(in srgb, var(--text) 14%, transparent); counter-reset: secn; }
+:root[dir="rtl"] .lp-c { --serif: "Noto Naskh Arabic", "Fraunces", serif; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .lp-c { --paper: var(--bg); } }
+:root[data-theme="dark"] .lp-c { --paper: var(--bg); }
+.lp-c, .lp-c .sec, .lp-c .rails { background: var(--paper); }
+.lp-c .sec { border-block-start: 1px solid var(--rule); }
+
+/* Numbered section labels: 01, 02 … */
+.lp-c .sec-head .eyebrow { counter-increment: secn; }
+.lp-c .sec-head .eyebrow::before { content: counter(secn, decimal-leading-zero); width: auto; height: auto; background: none; font: 400 1rem/1 var(--serif); color: var(--teal-ink); letter-spacing: 0; padding-inline-end: .7rem; border-inline-end: 1px solid var(--rule); }
+.lp-c .sec h2, .lp-c .pull, .lp-c .num-v, .lp-c .arch-detail h3, .lp-c .close-panel h2, .lp-c .pcard h2, .lp-c .quote blockquote, .lp-c .levels h3 { font-family: var(--serif); font-weight: 400; letter-spacing: -.02em; }
+.lp-c .sec h2 { font-size: clamp(2.3rem, 4.4vw, 3.8rem); line-height: 1.04; font-variation-settings: "opsz" 144; }
+:root[dir="rtl"] .lp-c .sec h2 { line-height: 1.45; letter-spacing: 0; font-size: clamp(2rem, 3.6vw, 3rem); }
+.lp-c .sec-sub { font-size: 1.12rem; }
+
+/* Rails: quiet hairline strip */
+.lp-c .rails { border-block: 1px solid var(--rule); }
+.lp-c .rails-track .bub { background: transparent; border: 1px solid var(--rule); }
+
+/* Layer diagram, drawn as an architectural elevation on paper */
+.lp-c .layer { color: var(--text); background: var(--paper); }
+.lp-c .layer .eyebrow { color: var(--teal-ink); }
+.lp-c .layer-bg { display: none; }
+.lp-c .band { border-radius: 4px; }
+.lp-c .b-top { background: transparent; border: 1px solid var(--rule); }
+.lp-c .b-top .band-chips li { background: transparent; border: 1px solid var(--rule); }
+.lp-c .b-mid { background: linear-gradient(120deg, #00706f, #008584); border-radius: 4px; box-shadow: 14px 14px 0 -1px var(--teal-soft); }
+:root[dir="rtl"] .lp-c .b-mid { box-shadow: -14px 14px 0 -1px var(--teal-soft); }
+.lp-c .b-core { background: repeating-linear-gradient(135deg, transparent 0 6px, color-mix(in srgb, var(--text) 5%, transparent) 6px 12px); border: 1px dashed var(--rule); color: var(--muted); }
+.lp-c .b-core .tag { background: transparent; border: 1px solid var(--rule); color: var(--muted); }
+.lp-c .flow i { background: var(--rule); }
+.lp-c .flow i::after { background: var(--brand); box-shadow: none; width: 6px; height: 6px; left: -2px; }
+.lp-c .pull { color: var(--text); font-style: italic; font-size: clamp(1.6rem, 3vw, 2.5rem); }
+:root[dir="rtl"] .lp-c .pull { font-style: normal; }
+.lp-c .pull::before, .lp-c .pull::after { color: var(--brand); }
+
+/* Journeys: an index — two columns of rows */
+.lp-c .seg-filter { gap: .2rem 1.6rem; border-block-end: 1px solid var(--rule); padding-block-end: .2rem; }
+.lp-c .seg-filter button { border: 0; border-radius: 0; background: none; padding: .55rem 0; min-height: 0; color: var(--muted); border-block-end: 2px solid transparent; margin-block-end: -1px; box-shadow: none; }
+.lp-c .seg-filter button[aria-pressed="true"] { background: none; color: var(--text); border-block-end-color: var(--brand); box-shadow: none; }
+.lp-c .seg-filter .count { background: none; font-family: var(--f-mono); }
+.lp-c .seg-filter [aria-pressed="true"] .count { background: none; color: var(--teal-ink); }
+.lp-c .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 2.5rem; counter-reset: card; }
+.lp-c .jcard { counter-increment: card; border-block-end: 1px solid var(--rule); }
+.lp-c .jc-btn { display: grid; grid-template-columns: 7.5rem minmax(0, 1fr); grid-template-areas: "thumb meta" "thumb title" "thumb line" "thumb kpi" "thumb cta"; column-gap: 1.25rem; row-gap: .3rem; align-items: start; padding: 1.25rem 0; border: 0; border-radius: 0; background: none; box-shadow: none !important; }
+.lp-c .jc-btn:hover { transform: none; }
+.lp-c .jc-btn > span:not(.jc-meta) { padding-inline: 0; }
+.lp-c .thumb { grid-area: thumb; aspect-ratio: 3 / 4; border-radius: 6px; }
+.lp-c .t-phone { width: 62%; margin-block-start: 30%; }
+.lp-c .jc-meta { grid-area: meta; padding: 0; }
+.lp-c .jc-meta::before { content: counter(card, decimal-leading-zero); font: 400 .95rem/1.6 var(--serif); color: var(--teal-ink); margin-inline-end: .4rem; }
+.lp-c .jc-title { grid-area: title; font-family: var(--serif); font-weight: 400; font-size: 1.35rem; letter-spacing: -.01em; transition: color .3s; }
+.lp-c .jc-btn:hover .jc-title { color: var(--teal-ink); }
+.lp-c .jc-line { grid-area: line; }
+.lp-c .jc-kpi { grid-area: kpi; }
+.lp-c .jc-cta { grid-area: cta; }
+.lp-c .jc-seg, .lp-c .jc-wave { background: none; padding: 0 .4rem 0 0; font-family: var(--f-mono); font-weight: 500; text-transform: uppercase; letter-spacing: .04em; }
+:root[dir="rtl"] .lp-c .jc-seg, :root[dir="rtl"] .lp-c .jc-wave { font-family: var(--f-sans); text-transform: none; letter-spacing: 0; padding: 0 0 0 .4rem; }
+.lp-c .jcard.is-tech.is-lit .jc-btn { box-shadow: inset 3px 0 0 var(--brand) !important; }
+:root[dir="rtl"] .lp-c .jcard.is-tech.is-lit .jc-btn { box-shadow: inset -3px 0 0 var(--brand) !important; }
+
+/* Numbers: huge serif numerals between hairlines */
+.lp-c .numbers { padding-block: clamp(3.5rem, 7vw, 6rem); }
+.lp-c .nums { border-color: var(--rule); }
+.lp-c .num + .num, .lp-c .num:nth-child(n+3) { border-color: var(--rule); }
+.lp-c .num-v { font-weight: 300; font-size: clamp(3.6rem, 7vw, 6.4rem); letter-spacing: -.04em; background: none; color: var(--text); -webkit-text-fill-color: currentColor; }
+.lp-c .num-l { font-family: var(--serif); font-size: 1.1rem; font-weight: 400; }
+
+/* Lens, platform: paper cards with hairlines instead of shadows */
+.lp-c .lens-card, .lp-c .levels li, .lp-c .arch, .lp-c .arch-blocks li, .lp-c .shipped-list li, .lp-c .quote { background: transparent; border: 1px solid var(--rule); border-radius: 6px; box-shadow: none; }
+.lp-c .platform, .lp-c .shipped { background: var(--paper); }
+.lp-c .levels li::after { height: 1px; }
+.lp-c .lv-n { border-radius: 50%; font-family: var(--serif); font-weight: 400; }
+.lp-c .arch-layer { border-radius: 4px; }
+.lp-c .arch-detail { border-radius: 4px; }
+.lp-c .arch-detail h3 { font-size: clamp(1.6rem, 2.8vw, 2.3rem); }
+
+/* Principles: two columns of ruled text, no colour blocks */
+.lp-c .principles { padding-block-start: var(--sec-pad); }
+.lp-c .pcard { border-radius: 0; padding: 0 0 0 1.5rem; background: none; color: var(--text); border-inline-start: 2px solid var(--brand); }
+:root[dir="rtl"] .lp-c .pcard { padding: 0 1.5rem 0 0; }
+.lp-c .pcard.ob p:not(.pc-lead):not(.eyebrow), .lp-c .pcard.ai p:not(.pc-lead):not(.eyebrow) { color: var(--muted); }
+.lp-c .pcard.ob .eyebrow { color: var(--teal-ink); }
+.lp-c .pcard h2 { font-size: clamp(1.9rem, 3vw, 2.6rem); }
+.lp-c .cv-bank { background: var(--surface-2); color: var(--teal-ink); }
+.lp-c .cv-line { background: var(--rule); }
+.lp-c .cv-line::after { background: linear-gradient(90deg, transparent, var(--brand), transparent); }
+.lp-c .lic li { border-color: var(--rule); color: var(--text); }
+
+/* Proof: a ruled logo table */
+.lp-c .logos { gap: 0; border-block: 1px solid var(--rule); }
+.lp-c .logos li { border-radius: 0; border: 0; border-inline-end: 1px solid var(--rule); background: transparent; }
+.lp-c .logos li:last-child { border-inline-end: 0; }
+.lp-c .logos li:hover { transform: none; box-shadow: none; }
+.lp-c .logos img { mix-blend-mode: multiply; }
+:root[data-theme="dark"] .lp-c .logos li { background: #fff; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .lp-c .logos li { background: #fff; } }
+.lp-c .quote blockquote { font-size: clamp(1.5rem, 2.6vw, 2.1rem); font-style: italic; line-height: 1.35; }
+:root[dir="rtl"] .lp-c .quote blockquote { font-style: normal; }
+
+/* Close: a quiet serif statement on paper */
+.lp-c .close-panel { color: var(--text); background: transparent; border: 1px solid var(--rule); border-radius: 6px; }
+.lp-c .close-panel h2 { font-size: clamp(2.4rem, 5vw, 4.4rem); color: var(--text); }
+.lp-c .close-arc path { stroke-width: 3; opacity: 1; stroke: var(--brand); }
+.lp-c .close-panel .btn-light { background: linear-gradient(135deg, var(--btn-a), var(--btn-b)); color: var(--on-btn); }
+.lp-c .close-panel .btn-outline-light { color: var(--text); border-color: var(--rule); background: transparent; }
+
+@media (max-width: 900px) {
+  .lp-c .cards { grid-template-columns: minmax(0, 1fr); }
+  .lp-c .logos li { border-block-end: 1px solid var(--rule); }
+}
+@media (max-width: 600px) {
+  .lp-c .jc-btn { grid-template-columns: 5.5rem minmax(0, 1fr); column-gap: 1rem; }
+  .lp-c .jc-title { font-size: 1.15rem; }
+}

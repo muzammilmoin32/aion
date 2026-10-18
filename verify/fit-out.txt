@@ -1,0 +1,35 @@
+DOES NOT FIT:
+1366x768 en option 2: content ends 3px below the fold
+1366x768 en option 3: content ends 3px below the fold
+1366x768 en behind option 2: content ends 3px below the fold
+1366x768 en behind option 3: content ends 3px below the fold
+1366x768 ar option 2: content ends 3px below the fold
+1366x768 ar option 3: content ends 3px below the fold
+1366x768 ar behind option 2: content ends 3px below the fold
+1366x768 ar behind option 3: content ends 3px below the fold
+1280x720 en option 2: content ends 3px below the fold
+1280x720 en option 3: content ends 3px below the fold
+1280x720 en behind option 2: content ends 3px below the fold
+1280x720 en behind option 3: content ends 3px below the fold
+1280x720 ar option 2: content ends 3px below the fold
+1280x720 ar option 3: content ends 3px below the fold
+1280x720 ar option 4: hero 631px > screen 602px
+1280x720 ar option 4: content ends 24px below the fold
+1280x720 ar option 5: hero 609px > screen 602px
+1280x720 ar option 5: content ends 3px below the fold
+1280x720 ar behind option 2: content ends 3px below the fold
+1280x720 ar behind option 3: content ends 3px below the fold
+1280x720 ar behind option 4: hero 631px > screen 602px
+1280x720 ar behind option 4: content ends 24px below the fold
+1280x720 ar behind option 5: hero 609px > screen 602px
+1280x720 ar behind option 5: content ends 3px below the fold
+1024x768 en option 2: content ends 3px below the fold
+1024x768 en option 3: content ends 3px below the fold
+1024x768 en behind option 2: content ends 2px below the fold
+1024x768 en behind option 3: content ends 3px below the fold
+1024x768 ar option 2: content ends 3px below the fold
+1024x768 ar option 3: content ends 3px below the fold
+1024x768 ar behind option 2: content ends 2px below the fold
+1024x768 ar behind option 3: content ends 3px below the fold
+360x740 ar option 5: hero 649px > screen 636px
+360x740 ar option 5: content ends 20px below the fold
