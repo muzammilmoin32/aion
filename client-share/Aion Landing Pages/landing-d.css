@@ -1,0 +1,134 @@
+/* Landing D · "Tilt": Night theme + glass hero (centred variant), with sections built around 3D tilt.
+   Loaded after styles.css, theme-dark.css, night.css. Logical properties for RTL. */
+
+.tilt { --pp: 1400px; }
+.tsec { position: relative; padding-block: 120px; }
+.tsec + .tsec { margin-top: 40px; }
+.tsec .shead { margin-bottom: 56px; }
+.tlead { color: var(--muted); font-size: 14px; line-height: 1.6; max-width: 380px; }
+.nhero[data-v="7"] .copy-1 { font-size: clamp(36px, 4vw, 54px) !important; }
+.nhero[data-v="7"] .hero-inner { gap: 34px !important; }
+
+/* ---------------- 1 · journey wall: a tilted floor of cards that stands up as you scroll ---------------- */
+.wall-stage { perspective: var(--pp); perspective-origin: 50% 0%; }
+.wall { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; transform-style: preserve-3d; transform-origin: 50% 0%;
+  transform: rotateX(calc(var(--p, 0) * 52deg)) translateY(calc(var(--p, 0) * 40px)) scale(calc(1 - var(--p, 0) * .08)); will-change: transform; }
+.wcard { position: relative; display: block; text-align: start; padding: 0; border: 1px solid var(--line); border-radius: 18px; background: rgb(13 13 12 / .82); color: var(--text); overflow: hidden; cursor: pointer;
+  transform: translateZ(var(--z, 0px)); transition: transform .45s var(--ease), border-color .3s, box-shadow .45s; box-shadow: 0 30px 60px rgb(0 0 0 / .45); }
+.wcard:focus-visible, .wcard[aria-pressed="true"] { --z: 40px; border-color: var(--teal-line); box-shadow: 0 50px 90px rgb(0 0 0 / .6), 0 0 40px rgb(47 214 201 / .16); }
+@media (hover: hover) { .wcard:hover { --z: 40px; border-color: var(--teal-line); box-shadow: 0 50px 90px rgb(0 0 0 / .6), 0 0 40px rgb(47 214 201 / .16); } }
+.wcard .wv { display: block; aspect-ratio: 16 / 10; width: 100%; object-fit: cover; background: #0b1214; }
+.wcard .wb { display: flex; flex-direction: column; gap: 6px; padding: 16px 18px 18px; }
+.wcard .wt { font-weight: 600; font-size: 17px; }
+.wcard .wl { color: var(--muted); font-size: 13px; line-height: 1.5; }
+.wcard .wk { margin-top: 6px; font: 400 11px/1.3 var(--f-mono); color: var(--brand-2); }
+:root[dir="rtl"] .wcard .wk { font-family: var(--f-sans); }
+.wcard .wplay { position: absolute; inset-block-start: 12px; inset-inline-end: 12px; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; background: rgb(0 0 0 / .5); color: #fff; font-size: 14px; backdrop-filter: blur(4px); }
+:root[dir="rtl"] .wcard .wplay .ic { transform: scaleX(-1); }
+
+/* ---------------- 2 · the layer stack: three isometric plates that separate on scroll ---------------- */
+.stack-wrap { display: grid; grid-template-columns: 1fr 1.1fr; gap: 40px; align-items: center; }
+.stack-stage { height: 520px; perspective: 1600px; display: grid; place-items: center; }
+.stack { position: relative; width: min(440px, 80vw); height: 300px; transform-style: preserve-3d; transform: rotateX(58deg) rotateZ(-38deg); }
+:root[dir="rtl"] .stack { transform: rotateX(58deg) rotateZ(38deg); }
+.plate { position: absolute; inset: 0; border-radius: 22px; transform: translateZ(calc(var(--k) * var(--sep, 20px))); transition: box-shadow .4s; display: grid; place-items: center;
+  border: 1px solid var(--line); background: linear-gradient(160deg, rgb(255 255 255 / .06), rgb(255 255 255 / .01)), rgb(16 17 17 / .86); box-shadow: 0 40px 60px rgb(0 0 0 / .5); }
+.plate.p-mid { border-color: rgb(47 214 201 / .6); background: linear-gradient(160deg, rgb(47 214 201 / .32), rgb(47 214 201 / .08)), rgb(8 30 28 / .9); box-shadow: 0 40px 70px rgb(0 0 0 / .55), 0 0 70px rgb(47 214 201 / .3); }
+.plate.p-low { border-style: dashed; }
+.plate .pl { font: 500 15px/1.3 var(--f-mono); color: var(--text); transform: rotateZ(38deg); text-align: center; padding: 10px; }
+:root[dir="rtl"] .plate .pl { transform: rotateZ(-38deg); font-family: var(--f-sans); }
+.plate .pl small { display: block; margin-top: 6px; font-size: 11px; color: var(--muted); }
+.plate.p-mid .pl { color: #e8fffc; }
+.plate .grid-dots { position: absolute; inset: 0; border-radius: inherit; background-image: radial-gradient(rgb(255 255 255 / .1) 1px, transparent 1px); background-size: 18px 18px; pointer-events: none; }
+.stack-legend { display: grid; gap: 14px; }
+.legend-row { display: grid; grid-template-columns: 14px 1fr; gap: 14px; align-items: start; padding: 14px 16px; border: 1px solid var(--line); border-radius: 14px; background: rgb(13 13 12 / .7); }
+.legend-row i { width: 14px; height: 14px; border-radius: 4px; margin-top: 3px; background: #3a3b39; }
+.legend-row.mid i { background: var(--brand); box-shadow: 0 0 12px var(--brand); }
+.legend-row b { display: block; font-weight: 600; margin-bottom: 4px; }
+.legend-row span { color: var(--muted); font-size: 13px; line-height: 1.5; }
+.pull-q { margin-top: 26px; font: italic 400 clamp(22px, 2.4vw, 30px)/1.3 var(--f-serif); color: var(--text); }
+:root[dir="rtl"] .pull-q { font-style: normal; }
+
+/* ---------------- 3 · tilted rails ribbons ---------------- */
+.ribbons { position: relative; height: 260px; overflow: hidden; margin-block: 20px; }
+.ribbon { position: absolute; inset-inline: -10%; display: flex; overflow: hidden; padding-block: 18px; }
+.ribbon.r1 { top: 40px; transform: rotate(-5deg); background: var(--brand); color: #031412; box-shadow: 0 20px 60px rgb(47 214 201 / .25); }
+.ribbon.r2 { top: 130px; transform: rotate(3.5deg); background: rgb(16 17 17 / .95); border-block: 1px solid var(--line); color: var(--text); }
+.ribbon ul { display: flex; flex: none; gap: 46px; padding-inline-end: 46px; margin: 0; list-style: none; animation: rib 30s linear infinite; }
+.ribbon.r2 ul { animation-direction: reverse; animation-duration: 36s; }
+.ribbon li { font: 600 22px/1 var(--f-sans); white-space: nowrap; display: inline-flex; align-items: center; gap: 46px; }
+.ribbon li::after { content: "✦"; font-size: 14px; opacity: .6; }
+@keyframes rib { to { transform: translateX(-100%); } }
+:root[dir="rtl"] .ribbon ul { animation-name: ribR; }
+.ribbons:hover .ribbon ul, .ribbons:focus-within .ribbon ul, .ribbons.paused .ribbon ul { animation-play-state: paused; }
+.rib-pause { position: absolute; inset-inline-end: 16px; bottom: 12px; z-index: 2; width: 36px; height: 36px; display: grid; place-items: center; border-radius: 50%; border: 1px solid var(--line); background: rgb(13 13 12 / .85); color: var(--text); cursor: pointer; }
+.rib-pause[aria-pressed="true"] { border-color: var(--teal-line); color: var(--teal, #2fd6c9); }
+@keyframes ribR { to { transform: translateX(100%); } }
+
+/* ---------------- 4 · numbers that flip in ---------------- */
+.flips { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; perspective: 1200px; }
+.flip { position: relative; height: 230px; transform-style: preserve-3d; transform: rotateY(-100deg); opacity: 0; transition: transform 1.2s cubic-bezier(.3, 1.3, .5, 1), opacity .6s; transition-delay: calc(var(--i) * 120ms); }
+:root[dir="rtl"] .flip { transform: rotateY(100deg); }
+.flips.in .flip { transform: none; opacity: 1; }
+.flip .face { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: space-between; padding: 22px; border-radius: 18px; border: 1px solid var(--line); background: linear-gradient(160deg, rgb(255 255 255 / .06), rgb(255 255 255 / .01) 40%), rgb(13 13 12 / .86); backface-visibility: hidden; }
+.flip .n { font-size: 58px; font-weight: 600; letter-spacing: -.04em; line-height: 1; }
+.flip .l { font-size: 14px; line-height: 1.45; color: #cfcfca; }
+.flip .s { font: 400 10px/1.4 var(--f-mono); color: var(--muted); }
+.flip::after { content: ""; position: absolute; inset-inline: 22px; bottom: 16px; height: 3px; border-radius: 3px; background: linear-gradient(90deg, var(--brand), transparent); box-shadow: 0 0 10px var(--brand); }
+:root[dir="rtl"] .flip::after { background: linear-gradient(-90deg, var(--brand), transparent); }
+
+/* ---------------- 5 · pointer-tilt cards ---------------- */
+.tcards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; perspective: 1100px; }
+.tcard { position: relative; padding: 26px; border-radius: 20px; border: 1px solid var(--line); background: linear-gradient(160deg, rgb(255 255 255 / .06), rgb(255 255 255 / .01) 40%), rgb(13 13 12 / .86); transform-style: preserve-3d;
+  transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)); transition: transform .5s var(--ease), border-color .3s, box-shadow .4s; min-height: 300px; display: flex; flex-direction: column; gap: 10px; }
+.tcard.is-tilting { transition: transform .08s linear, border-color .3s, box-shadow .4s; }
+.tcard:hover { border-color: var(--teal-line); box-shadow: 0 40px 80px rgb(0 0 0 / .55), 0 0 40px rgb(47 214 201 / .12); }
+.tcard::before { content: ""; position: absolute; inset: 0; border-radius: inherit; background: radial-gradient(300px circle at var(--gx, 50%) var(--gy, 0%), rgb(111 240 228 / .12), transparent 60%); pointer-events: none; }
+.tcard > * { transform: translateZ(40px); }
+.tcard .ti { width: 46px; height: 46px; border-radius: 14px; display: grid; place-items: center; font-size: 22px; color: #031412; background: var(--brand); box-shadow: 0 0 24px rgb(47 214 201 / .35); transform: translateZ(70px); }
+.tcard h3 { font-size: 22px; font-weight: 600; margin-top: 8px; }
+.tcard p { color: var(--muted); font-size: 13.5px; line-height: 1.55; }
+.tcard ul { list-style: none; margin: auto 0 0; padding: 0; display: grid; gap: 8px; }
+.tcard li { font-size: 13px; color: #cfcfca; display: flex; gap: 9px; }
+.tcard li::before { content: "✓"; color: var(--brand); }
+.tcard.rec { border-color: rgb(47 214 201 / .55); }
+
+/* ---------------- 6 · tilting closing card ---------------- */
+.close-stage { perspective: 1200px; }
+.close-card { position: relative; border-radius: 28px; padding: clamp(40px, 6vw, 80px) clamp(24px, 5vw, 70px); background: radial-gradient(60% 80% at 100% 0%, rgb(255 255 255 / .3), transparent 60%), var(--brand); color: #031412; text-align: center;
+  transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)); transition: transform .5s var(--ease); box-shadow: 0 0 90px rgb(47 214 201 / .22); transform-style: preserve-3d; }
+.close-card.is-tilting { transition: transform .08s linear; }
+.close-card .mono { color: rgb(3 20 18 / .6) !important; }
+.close-card h2 { font-size: clamp(30px, 4.4vw, 56px); line-height: 1.08; letter-spacing: -.03em; font-weight: 600; margin: 14px auto 18px; max-width: 18ch; transform: translateZ(50px); }
+.close-card h2 em.s { color: #031412 !important; }
+.close-card p { max-width: 520px; margin: 0 auto 26px; color: rgb(3 20 18 / .75); line-height: 1.55; transform: translateZ(30px); }
+.close-card .cc-ctas { justify-content: center; transform: translateZ(60px); }
+.close-card .cc-ctas .btn:first-child { background: #031412; color: #fff; border-color: transparent; }
+.close-card .cc-ctas .btn.ghost { background: rgb(255 255 255 / .35); color: #031412; border-color: rgb(3 20 18 / .2); }
+.close-card :focus-visible { outline-color: #031412; }
+.close-card::after { content: ""; position: absolute; inset: 0; border-radius: inherit; background-image: radial-gradient(rgb(0 0 0 / .12) 1px, transparent 1px); background-size: 22px 22px; pointer-events: none; }
+.dfoot { position: relative; z-index: 2; padding-block: 40px; border-top: 1px solid var(--line); background: rgb(0 0 0 / .65); margin-top: 120px; }
+.dfoot .nwrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px; align-items: center; }
+.dfoot img { height: 34px; width: auto; }
+
+/* ---------------- responsive ---------------- */
+@media (max-width: 900px) {
+  .wall { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .stack-wrap, .tcards { grid-template-columns: minmax(0, 1fr); }
+  .stack-stage { height: 380px; }
+  .flips { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .tsec { padding-block: 80px; }
+}
+@media (max-width: 520px) {
+  .wall { grid-template-columns: minmax(0, 1fr); }
+  .stack { height: 220px; width: min(440px, 70vw); }
+  .flip { height: 190px; } .flip .n { font-size: 44px; }
+  .ribbon li { font-size: 17px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wall { transform: none !important; }
+  .flip { transform: none !important; opacity: 1 !important; transition: none; }
+  .ribbons .ribbon ul, :root[dir] .ribbons .ribbon ul { animation: none !important; }
+  .rib-pause { display: none; }
+  .tcard, .close-card { transform: none !important; }
+}

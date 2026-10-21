@@ -703,7 +703,7 @@ class Hero {
      measurement gives the answer; CSS eases --pw-fit to it. */
   /* Returns the target phone width (reads only); apply() writes it. */
   measure() {
-    if (this.el.classList.contains('is-focus')) return null;
+    if (this.el.classList.contains('is-focus') || this.el.dataset.fit === 'off') return null;
     const stacked = window.matchMedia('(max-width: 999px)').matches;
     const cs = getComputedStyle(this.el);
     const avail = viewportH() - headerH();
@@ -1001,7 +1001,9 @@ function init() {
   // Which designs to render: the landing page uses one ("1"); /mockups renders all five.
   const versions = (main.dataset.versions || '1,2,3,4,5').split(',').map(Number);
   versions.forEach((v) => {
-    const frag = tpl.content.cloneNode(true);
+    // a version may have its own template (e.g. the glass-stage hero: <template data-for="6 7 8">)
+    const own = document.getElementById(`hero-tpl-${v}`) || document.querySelector(`template[data-for~="${v}"]`);
+    const frag = (own || tpl).content.cloneNode(true);
     const sec = frag.querySelector('.hero');
     sec.id = main.dataset.heroId && versions.length === 1 ? main.dataset.heroId : `option-${v}`;
     sec.dataset.v = v;

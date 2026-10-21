@@ -223,6 +223,8 @@ async function t4AnchorOffset() {
     try {
       await page.click('.options-row a[href="#option-3"]');
       await page.waitForTimeout(150);
+      // the eased glide can pause for a few hundred ms while headless Chromium rasterises the video heroes; wait for it to arrive
+      await page.waitForFunction(() => Math.abs(document.getElementById('option-3').getBoundingClientRect().top - document.querySelector('.site-header').getBoundingClientRect().bottom) < 6, null, { timeout: 8000 }).catch(() => {});
       await waitForScrollIdle(page);
       const r = await page.evaluate(() => ({
         headerBottom: document.querySelector('.site-header').getBoundingClientRect().bottom,
@@ -264,7 +266,7 @@ async function t5Pause() {
 }
 
 async function t6GlobalToggles() {
-  await test(6, 'Behind switch and Technical lens apply to all five heroes', async (c) => {
+  await test(6, 'Behind switch and Technical lens apply to every hero', async (c) => {
     const { ctx, page } = await openPage();
     try {
       await page.click('#option-3 .behind-switch');
@@ -272,7 +274,7 @@ async function t6GlobalToggles() {
         checked: [...document.querySelectorAll('.behind-switch')].map((s) => s.getAttribute('aria-checked')),
         behind: document.documentElement.dataset.behind,
       }));
-      c.ok('all five switches aria-checked=true', b.checked.length === 5 && b.checked.every((x) => x === 'true'), b.checked);
+      c.ok('every switch aria-checked=true', b.checked.length >= 5 && b.checked.every((x) => x === 'true'), b.checked);
       c.ok('html[data-behind] = on', b.behind === 'on', b.behind);
 
       await page.click('button[data-lens="technical"]');
@@ -281,8 +283,8 @@ async function t6GlobalToggles() {
         biz: getComputedStyle(h.querySelector('.kpi-biz')).display,
         tech: getComputedStyle(h.querySelector('.kpi-tech')).display,
       })));
-      c.ok('every hero: .kpi-biz hidden', k.length === 5 && k.every((x) => x.biz === 'none'), k);
-      c.ok('every hero: .kpi-tech shown', k.length === 5 && k.every((x) => x.tech !== 'none'), k);
+      c.ok('every hero: .kpi-biz hidden', k.length >= 5 && k.every((x) => x.biz === 'none'), k);
+      c.ok('every hero: .kpi-tech shown', k.length >= 5 && k.every((x) => x.tech !== 'none'), k);
     } finally { await ctx.close(); }
   });
 }
@@ -294,6 +296,7 @@ async function t7AllChips() {
       for (const v of HEROES) {
         for (const j of JIDS) {
           await page.locator(`#option-${v} .chip[data-j="${j}"]`).click();
+          await page.waitForFunction(([sel, jj]) => { const m = document.querySelector(sel + " video[data-demo-media]"); return m && (m.currentSrc || "").includes("/" + jj + "-"); }, [`#option-${v}`, j], { timeout: 4000 }).catch(() => {});
           const r = await page.evaluate((sel) => {
             const h = document.querySelector(sel);
             return {

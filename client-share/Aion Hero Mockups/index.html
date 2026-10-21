@@ -1,16 +1,22 @@
 <!doctype html>
-<html lang="en" dir="ltr" data-lens="business" data-behind="off">
+<html lang="en" dir="ltr" data-skin="night" data-lens="business" data-behind="off">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="color-scheme" content="light dark">
+  <meta name="color-scheme" content="dark">
   <title>Aion · Hero section mockups</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=Fraunces:opsz,wght@9..144,400;9..144,500&family=Noto+Naskh+Arabic:wght@400;600&family=Readex+Pro:wght@300;400;500;600&family=Space+Grotesk:wght@400;500;700&family=Noto+Kufi+Arabic:wght@400;600;700&display=swap">
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap">
+  <link rel="stylesheet" href="theme-dark.css">
+  <link rel="stylesheet" href="night.css">
   <script src="app.js" defer></script>
   <script src="video-demo.js" defer></script>
+  <script src="glass-hero.js" defer></script>
+  <script src="waves-settings.js" defer></script>
+  <script src="theme-dark.js" defer></script>
 </head>
 <body data-base="">
   <!-- ARABIC REVIEW: all Arabic UI strings live in app.js and must be reviewed by a native Saudi reader before publishing. -->
@@ -93,6 +99,9 @@
           <li><a href="#option-3" data-opt-n="3">Option 3</a></li>
           <li><a href="#option-4" data-opt-n="4">Option 4</a></li>
           <li><a href="#option-5" data-opt-n="5">Option 5</a></li>
+          <li><a href="#option-6" data-opt-n="6">Option 6</a></li>
+          <li><a href="#option-7" data-opt-n="7">Option 7</a></li>
+          <li><a href="#option-8" data-opt-n="8">Option 8</a></li>
         </ul>
       </nav>
       <div class="seg seg-sm" role="group" data-i18n-aria="theme" aria-label="Theme">
@@ -103,7 +112,7 @@
     </div>
   </header>
 
-  <main id="heroes" tabindex="-1" data-versions="1,2,3,4,5">
+  <main id="heroes" tabindex="-1" data-versions="1,2,3,4,5,6,7,8">
     <h1 class="sr-only" data-i18n="h1">Aion homepage hero: five design options</h1>
   </main>
 
@@ -181,6 +190,78 @@
             </div>
           </div>
 
+        </div>
+      </div>
+    </section>
+  </template>
+
+  <template id="hero-tpl-glass" data-for="6 7 8">
+    <section class="hero nhero" data-fit="off">
+      <div class="hero-inner">
+        <div class="hero-copy">
+          <span class="ntag reveal-h"><span class="dot"></span><span class="n-chip"></span></span>
+          <h2 class="copy-1"></h2>
+          <p class="copy-2"></p>
+          <p class="copy-3"></p>
+          <div class="ctas">
+            <button type="button" class="btn btn-primary btn-lg" data-open-booking><svg class="ic" aria-hidden="true"><use href="#i-calendar"/></svg><span data-i18n="bookLong">Book a 20-minute walkthrough</span></button>
+            <a class="btn btn-ghost btn-lg" href="https://wa.me/000000000000" target="_blank" rel="noopener"><svg class="ic" aria-hidden="true"><use href="#i-chat"/></svg><span data-i18n="whatsapp">Message us on WhatsApp</span></a>
+          </div>
+          <p class="foot"></p>
+        </div>
+
+        <div class="hero-stage nstage">
+          <div class="g3d">
+            <div class="gback" aria-hidden="true"></div>
+            <div class="gpanel" aria-hidden="true"></div>
+            <!-- layer 1: the glass app window -->
+            <div class="glayer gl1">
+              <div class="g-top"><span class="mono g-name"></span><span class="mono g-steps"></span><span class="mono run">● <span class="g-run"></span></span></div>
+              <div class="chips" role="group"></div>
+              <div class="controls">
+                <button type="button" class="behind-switch" role="switch" aria-checked="false">
+                  <span class="sw-track" aria-hidden="true"><span class="sw-thumb"></span></span>
+                  <span data-i18n="behind">Show what's behind it</span>
+                </button>
+                <button type="button" class="pause-btn" data-state="playing"><span aria-hidden="true"></span></button>
+              </div>
+              <div class="g-body">
+                <div class="progress">
+                  <div class="bar-track" aria-hidden="true"><span class="bar-fill"></span></div>
+                  <ol class="steps"></ol>
+                </div>
+                <div class="trace-wrap">
+                  <aside class="trace" aria-hidden="true" inert>
+                    <div class="trace-head"><h3 class="trace-title" data-i18n="behindTitle">Behind the screen</h3><span class="live" aria-hidden="true"><i></i>LIVE</span></div>
+                    <ol class="trace-list"></ol>
+                    <p class="trace-note" data-i18n="traceNote"></p>
+                  </aside>
+                </div>
+              </div>
+            </div>
+            <!-- layer 2: the phone floating in front of the glass -->
+            <div class="glayer gl2">
+              <div class="phone-area">
+                <figure class="phone-fig" role="group">
+                  <div class="phone-tilt">
+                    <div class="phone">
+                      <div class="phone-screen">
+                        <video class="demo-media" data-demo-media muted playsinline loop autoplay preload="metadata" aria-hidden="true"></video>
+                        <span class="vid-tag" aria-hidden="true" data-i18n="vidTag">Sample video</span>
+                        <p class="phone-caption" aria-hidden="true"><span class="cap-dot"></span><span class="cap-t"></span></p>
+                      </div>
+                    </div>
+                  </div>
+                  <figcaption class="sr-only sr-caption"></figcaption>
+                </figure>
+              </div>
+            </div>
+            <!-- layer 3: floating cards, nearest to the viewer -->
+            <div class="glayer gl3">
+              <div class="kpi"></div>
+              <div class="toast" aria-hidden="true"></div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
