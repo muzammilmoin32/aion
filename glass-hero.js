@@ -67,6 +67,9 @@
     addEventListener('scroll', wake, { passive: true });
     addEventListener('resize', wake);
     document.addEventListener('aion:lang', wake);
+    // a hero can be scrolled into view before app.js marks it visible; wake again once it is on screen
+    const seen = new IntersectionObserver(() => setTimeout(wake, 0), { threshold: [0, 0.15] });   // 0.15 = app.js's visibility line
+    rigs.forEach((r) => seen.observe(r.h.el));
     const loop = (t) => {
       const dt = Math.min(0.05, (t - last) / 1000); last = t;
       const rtl = document.documentElement.dir === 'rtl' ? -1 : 1;   // mirror the lean in Arabic

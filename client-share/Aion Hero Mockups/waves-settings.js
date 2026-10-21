@@ -47,10 +47,12 @@ window.AION_WAVES = {
   path: {
     brightPointX: 0.62,        // where the bright point sits across the hero (0 = left, 1 = right), desktop
     brightPointXMobile: 0.86,  // the same on phones
-    swingInSoftSections: 0.68, // how far the ribbon swings from the centre inside blurred sections (0 – 0.9; above 0.5 goes off-screen)
+    swingInSoftSections: 0.38, // how far the ribbon swings from the centre inside blurred sections (0 – 0.9; keep under 0.45 so the turns stay on screen)
     swingElsewhere: 0.42,      // how far it swings from the centre in sharp areas (0 – 0.5; bigger keeps it at the edges, clear of text)
     bendEveryScreens: 1.3,     // distance between bends, in screen heights (0.8 – 2.5)
     endSweep: true,            // finish with one smooth sweep behind the closing card (no sharp corner)
+    mergeAtTurns: 0.85,        // right at every turn the wires gather into one bright bundle; everywhere else they stay spread (0 = no merge, 1 = tightest bundle)
+    mergeLength: 220,          // how long the merged stretch is around each turn, in px (100 = a short pinch, 400 = a long gathered stretch)
   },
 
   /* ---------------- drawing as you scroll ---------------- */

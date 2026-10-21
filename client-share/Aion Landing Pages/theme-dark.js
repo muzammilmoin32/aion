@@ -44,11 +44,9 @@
   /* ------------------------------------------------------------------ eased wheel scrolling */
   const SS = (() => {
     // settings: window.AION_SCROLL (waves-settings.js). Touch screens keep their native momentum scrolling.
-    const SC = (() => {
-      const u = window.AION_SCROLL || {}; const n = (v, d, lo, hi) => (v !== null && v !== '' && Number.isFinite(+v) ? Math.min(hi, Math.max(lo, +v)) : d);
-      return { enabled: u.enabled !== false, smoothness: n(u.smoothness, 1, 0.3, 3), wheelSpeed: n(u.wheelSpeed, 1, 0.3, 3), keyboard: u.keyboard !== false };
-    })();
-    if (reduce || coarse || !SC.enabled) return { start() { }, to(y) { scrollTo(0, y); } };
+    const SC = (() => { const u = window.AION_SCROLL || {}; const n = (v, d, lo, hi) => (v !== null && v !== '' && Number.isFinite(+v) ? Math.min(hi, Math.max(lo, +v)) : d);
+      return { enabled: u.enabled !== false, smoothness: n(u.smoothness, 1, 0.3, 3), wheelSpeed: n(u.wheelSpeed, 1, 0.3, 3), keyboard: u.keyboard !== false }; })();
+    if (reduce || coarse || !SC.enabled) return { start() {}, to(y) { scrollTo(0, y); } };
     const rate = 5.5 / SC.smoothness;   // higher smoothness = longer, softer glide
     let aim = null;   // { el, off } while gliding to an in-page anchor
     let target = scrollY; let cur = scrollY; let active = false; let locked = true;
@@ -78,6 +76,7 @@
     // keyboard scrolling glides too (arrows, Page Up/Down, Space, Home/End), unless the key belongs to a control
     const KEYS = { ArrowDown: 1, ArrowUp: -1, PageDown: 2, PageUp: -2, ' ': 2, Home: -3, End: 3 };
     addEventListener('keydown', (e) => {
+      if (e.key === 'Shift' || e.key === 'Control' || e.key === 'Alt' || e.key === 'Meta') return;   // a lone modifier must not hitch the glide
       const k = KEYS[e.key];
       const t = e.target;
       const own = t && t.closest && t.closest('input, textarea, select, button, [contenteditable], [role="slider"], [role="tablist"], [role="radiogroup"], [role="menu"], dialog, .nav-panel, .mega');
@@ -115,8 +114,8 @@
       fibres: 110, fibreBrightness: 1.35, fibreThickness: 1, ribbonWidth: 1, glowLayers: 40, glowLayersMobile: 12, flowSpeed: 1, waviness: 1,
       dust: 1.6, dustSpeed: 1, dustSpread: 1, bokeh: 0.16, specks: 90,
       boost: { extraDust: 2.2, brighterDust: 0.7, brighterGlow: 0.45, easeSeconds: 0.35 },
-      path: { brightPointX: 0.62, brightPointXMobile: 0.86, swingInSoftSections: 0.68, swingElsewhere: 0.42, bendEveryScreens: 1.3, endSweep: true },
-      drawAhead: 0.72, drawDelay: 0, blurAll: true, blurAmount: 5, softEdge: 150, heroBrightness: 1, sectionBrightness: 0.7, closingBrightness: 0.85,
+      path: { brightPointX: 0.62, brightPointXMobile: 0.86, swingInSoftSections: 0.38, swingElsewhere: 0.42, bendEveryScreens: 1.3, endSweep: true, mergeAtTurns: 0.85, mergeLength: 220 },
+      drawAhead: 0.72, drawDelay: 0, blurAll: true, blurAmount: 1, softEdge: 150, heroBrightness: 1, sectionBrightness: 0.7, closingBrightness: 0.85,
     };
     const u = window.AION_WAVES || {};
     // a typo in the settings file ("fast", 1,8) falls back to the default instead of hiding the dust
@@ -141,7 +140,7 @@ float frontAt(float y){float d=(y-uHead+70.)/70.;return exp(-d*d);}
 vec4 clip(vec2 p){return vec4(p.x/uRes.x*2.-1.,1.-p.y/uRes.y*2.,0.,1.);}
 `;
     const VS_LINE = COMMON + `
-uniform int uFirst; uniform float uPass; uniform float uBoost;
+uniform int uFirst; uniform float uPass; uniform float uBoost; uniform float uMergeFrom;
 in vec4 aS1; in vec4 aS2; in vec3 aCol;
 out float vD; out float vHW; out float vW; out float vA; out vec3 vC; out float vS; out float vPh; out float vSp;
 void main(){
@@ -149,12 +148,13 @@ void main(){
   vec4 a=P(i,0), b=P(i,1); float w=b.x, sq=b.y, R=b.z, s=b.w;
   float o=aS1.x*w*sq + aS1.y*(3.+24.*(1.-sq)) + aS1.z*w*.05*sq + sin(s*6.+uTime*.16*aS2.x+aS1.w)*w*${gf(0.07 * WV.waviness)}*sq;
   float f=focusAt(a.y), hw, al;
-  o=mix(o,clamp(o,-R*.85,R*.85),f);   // only keep fibres from folding where they are in sharp focus
+  o=clamp(o,-R*.85,R*.85);   // fibres never fold through a bend (no fanning at the turns)
   if(uPass<.5){ hw=aS2.z*.5+1.2; vW=aS2.z*.5; al=aS2.y*f; }
   else if(uPass<1.5){ hw=mix(8.,52.,1.-f); vW=0.; al=aS2.y*mix(.11,.15,1.-f); }
   else { hw=mix(70.,190.,1.-f); vW=0.; al=mix(.03,.07,1.-f); o=0.; }
   vec2 pos=a.xy+a.zw*(o+side*hw); pos.y-=uScroll;
   al*=1.+${gf(WV.boost.brighterGlow)}*uBoost;
+  if(uPass<.5) al*=1.+.6*(1.-sq)*step(uMergeFrom,a.y);   // wires merged at a turn glow brighter (below the hero only)
   vD=side*hw; vHW=hw; vA=al*headAt(a.y)*(1.+2.2*frontAt(a.y)*f); vC=aCol; vS=s; vPh=aS1.w; vSp=aS2.x;
   gl_Position=clip(pos);
 }`;
@@ -185,7 +185,7 @@ void main(){
     vec4 a=mix(P(i,0),P(i+1,0),fr), b=mix(P(i,1),P(i+1,1),fr);
     float spread=(kind>1.5)? (b.x*b.y+60.)*1.8 : (b.x*b.y+24.);
     float o=(kind>.5&&kind<1.5)?0.:aP.y*spread + sin(uTime*1.3+aK.x*11.)*(kind>1.5?18.:4.);
-    if(kind<.5){ float f0=focusAt(a.y); o=mix(o,clamp(o,-b.z*.85,b.z*.85),f0); }   // like the fibres: dust must not fold through a tight bend
+    if(kind<.5) o=clamp(o,-b.z*.85,b.z*.85);   // like the fibres: dust must not fold through a tight bend
     c=a.xy+a.zw*o; y=a.y; foc=focusAt(y);
     float al = aK.z<0. ? -aK.z*uBoost : aK.z*(1.+${gf(WV.boost.brighterDust)}*uBoost);   // negative alpha: extra particles that appear only when boosted
     vA = (kind>.5&&kind<1.5) ? .94+.06*sin(uTime*.9)*(1.+uBoost) : al*tw*foc;
@@ -216,13 +216,13 @@ void main(){ float r2=dot(vUv,vUv); vec3 col=vCol; float a;
     }
     const PL = prog(VS_LINE, FS_LINE); const PS = prog(VS_SPR, FS_SPR);
     if (!PL || !PS) return null;
-    const names = ['uPath', 'uRes', 'uScroll', 'uTime', 'uHead', 'uFogA', 'uFogB', 'uFirst', 'uPass', 'uN', 'uKnotI', 'uBoost', 'uZ', 'uZN'];
+    const names = ['uPath', 'uRes', 'uScroll', 'uTime', 'uHead', 'uFogA', 'uFogB', 'uFirst', 'uPass', 'uN', 'uKnotI', 'uBoost', 'uZ', 'uZN', 'uMergeFrom'];
     const uL = {}; const uS = {};
     names.forEach((n) => { uL[n] = gl.getUniformLocation(PL, n); uS[n] = gl.getUniformLocation(PS, n); });
     const tex = gl.createTexture(); const vaoL = gl.createVertexArray(); const vaoS = gl.createVertexArray(); const bufL = gl.createBuffer(); const bufS = gl.createBuffer();
     let boost = 0;
     let zones = [];
-    let W; let H; let dpr; let pts = []; let pinch = 0; let head = 0; let built = false; let fogA = 0; let fogB = 0; let nStr = 0; let nSpr = 0; let started = false; let startT = 0; let maxS = 0;
+    let W; let H; let dpr; let pts = []; let pinch = 0; let head = 0; let built = false; let fogA = 0; let fogB = 0; let nStr = 0; let nSpr = 0; let started = false; let startT = 0; let maxS = 0; let mergeFrom = 1e9;
     const GLOW = Math.round(coarse ? WV.glowLayersMobile : WV.glowLayers);
     c.addEventListener('webglcontextlost', (e) => { e.preventDefault(); built = false; });
     const abs = (el) => { const r = el.getBoundingClientRect(); return { t: r.top + scrollY, h: r.height }; };
@@ -256,7 +256,12 @@ void main(){ float r2=dot(vUv,vUv); vec3 col=vCol; float a;
       const cp = [[X(1.18), -hh * 0.32, 300, 1], [X(0.86), hh * 0.18, 240, 0.6], [X(vx), hh * 0.6, 40, 0], [X(0.3), hh * 0.92, 190, 0.5], [X(0.22), hh * 1.18, 230, 0.85]];
       let y = hh * 1.18; let n = 0; const stepY = Math.max(700, H * WV.path.bendEveryScreens); const stopY = end.t - H * (WV.path.endSweep ? 0.9 : 0.35);
       // wide edge-to-edge swings only inside a soft zone (with blurAll: every bend up to the last section); otherwise a gentle meander that stays clear of the text column
-      while (y + stepY < stopY) { y += stepY; n += 1; const sw = inZone(y) ? WV.path.swingInSoftSections : WV.path.swingElsewhere; cp.push([X(n % 2 ? 0.5 - sw : 0.5 + sw), y, inZone(y) ? 320 : 200, 1]); }
+      mergeFrom = hh * 1.18;
+      const turns = [];   // [x px, y] of every bend, where the wires merge
+      while (y + stepY < stopY) {
+        y += stepY; n += 1; const sw = inZone(y) ? WV.path.swingInSoftSections : WV.path.swingElsewhere;
+        const tx = X(n % 2 ? 0.5 - sw : 0.5 + sw); cp.push([tx, y, inZone(y) ? 260 : 200, 1]); turns.push([tx * W, y]);
+      }
       if (WV.path.endSweep) {
         // one smooth sweep behind the closing card, then off the bottom (no tight corners)
         const last = cp[cp.length - 1];
@@ -281,20 +286,29 @@ void main(){ float r2=dot(vUv,vUv); vec3 col=vCol; float a;
         while (d >= need) { const f = need / d; ax += (q[0] - ax) * f; ay += (q[1] - ay) * f; aw += (q[2] - aw) * f; aq += (q[3] - aq) * f; pts.push([ax, ay, aw, aq]); d -= need; need = SP; }
         need -= d;
       }
+      // the wires stay fully spread everywhere and gather into one bright bundle only right at each turn
+      const mg = clamp(Number(WV.path.mergeAtTurns) || 0, 0, 1); const mL = Math.max(60, Number(WV.path.mergeLength) || 220);
+      if (mg > 0 && turns.length) for (const pt of pts) {
+        let d2 = 1e18; for (const t of turns) { const dx = pt[0] - t[0]; const dy = pt[1] - t[1]; d2 = Math.min(d2, dx * dx + dy * dy); }
+        const f = Math.exp(-d2 / (mL * mL));
+        if (f > 1e-3) { pt[2] = lerp(pt[2], 46 * k, mg * f); pt[3] *= 1 - mg * 0.9 * f; }
+      }
       const NPt = pts.length; const nx = new Float32Array(NPt); const ny = new Float32Array(NPt); const R = new Float32Array(NPt); const cap = new Float32Array(NPt); const tmp = new Float32Array(NPt);
       for (let i = 0; i < NPt; i += 1) { const a = pts[Math.max(0, i - 3)]; const b = pts[Math.min(NPt - 1, i + 3)]; const dx = b[0] - a[0]; const dy = b[1] - a[1]; const l = Math.hypot(dx, dy) || 1; nx[i] = -dy / l; ny[i] = dx / l; }
       for (let i = 0; i < NPt; i += 1) { const a = Math.max(0, i - 8); const b = Math.min(NPt - 1, i + 8); let dt = Math.abs(Math.atan2(ny[b], nx[b]) - Math.atan2(ny[a], nx[a])); if (dt > Math.PI) dt = 2 * Math.PI - dt; R[i] = dt < 1e-4 ? 1e6 : ((b - a) * SP) / dt; }
-      for (let i = 0; i < NPt; i += 1) cap[i] = Math.min(pts[i][2], R[i] * 0.7 / Math.max(pts[i][3], 0.05));
-      for (let pass = 0; pass < 2; pass += 1) { tmp.set(cap); for (let i = 0; i < NPt; i += 1) { let m = 1e9; for (let j = Math.max(0, i - 14); j <= Math.min(NPt - 1, i + 14); j += 1) m = Math.min(m, tmp[j]); cap[i] = m; } }
-      tmp.set(cap);
-      for (let i = 0; i < NPt; i += 1) { let s2 = 0; let c2 = 0; for (let j = Math.max(0, i - 18); j <= Math.min(NPt - 1, i + 18); j += 1) { s2 += tmp[j]; c2 += 1; } cap[i] = s2 / c2; }
+      // cap holds only the bend limit (the raw width is applied afterwards), so the hero's narrow pinch never leaks into the filters
+      const CAPMAX = 300 * k;
+      for (let i = 0; i < NPt; i += 1) cap[i] = Math.min(CAPMAX, R[i] * 0.7 / Math.max(pts[i][3], 0.05));
+      { tmp.set(cap); for (let i = 0; i < NPt; i += 1) { let m = 1e9; for (let j = Math.max(0, i - 120); j <= Math.min(NPt - 1, i + 120); j += 1) m = Math.min(m, tmp[j]); cap[i] = m; } }   // reach ≥ the blur below
+      // blend width changes over ~700px so the ribbon eases into each bend with no visible joint
+      for (let pass = 0; pass < 2; pass += 1) { tmp.set(cap); for (let i = 0; i < NPt; i += 1) { let s2 = 0; let c2 = 0; for (let j = Math.max(0, i - 60); j <= Math.min(NPt - 1, i + 60); j += 1) { s2 += tmp[j]; c2 += 1; } cap[i] = s2 / c2; } }
       let mq = 9; pinch = 0;
       for (let i = 0; i < NPt && pts[i][1] < hh; i += 1) if (pts[i][3] < mq) { mq = pts[i][3]; pinch = i; }
       const rows = Math.ceil(NPt / TW); const data = new Float32Array(TW * rows * 2 * 4);
       for (let i = 0; i < NPt; i += 1) {
         const x0 = i % TW; const y0 = Math.floor(i / TW) * 2;
         data.set([pts[i][0], pts[i][1], nx[i], ny[i]], (y0 * TW + x0) * 4);
-        data.set([Math.min(pts[i][2], Math.max(cap[i], (i > pinch + 200 ? 150 : 0) * pts[i][3])), pts[i][3], Math.min(R[i], 1e6), i * SP / 1000], ((y0 + 1) * TW + x0) * 4);
+        data.set([Math.min(pts[i][2], cap[i]), pts[i][3], Math.min(R[i], 1e6), i * SP / 1000], ((y0 + 1) * TW + x0) * 4);
       }
       gl.bindTexture(gl.TEXTURE_2D, tex);
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA32F, TW, rows * 2, 0, gl.RGBA, gl.FLOAT, data);
@@ -306,7 +320,7 @@ void main(){ float r2=dot(vUv,vUv); vec3 col=vCol; float a;
         const col = r < 0.06 ? WV.colors.white : (mid && r < 0.55) ? WV.colors.core : WV.colors.main;
         st.push({ f, col, a: (0.12 + Rn() * 0.32) * WV.fibreBrightness, lw: (0.45 + Rn() * 0.8) * WV.fibreThickness, ph: Rn() * 6.283, nz: (Rn() - 0.5) * 2, core: Math.pow(Rn(), 1.6) * (Rn() < 0.5 ? -1 : 1), sp: 0.2 + Rn() * 0.6 });
       }
-      for (let i = st.length - 1; i > 0; i -= 1) { const j = Math.floor(Rn() * (i + 1));[st[i], st[j]] = [st[j], st[i]]; }
+      for (let i = st.length - 1; i > 0; i -= 1) { const j = Math.floor(Rn() * (i + 1)); [st[i], st[j]] = [st[j], st[i]]; }
       const inst = new Float32Array(N * 11);
       st.forEach((s, i) => inst.set([s.f, s.core, s.nz, s.ph, s.sp, s.a, s.lw, 0, s.col[0] / 255, s.col[1] / 255, s.col[2] / 255], i * 11));
       nStr = N;
@@ -348,7 +362,7 @@ void main(){ float r2=dot(vUv,vUv); vec3 col=vCol; float a;
       if (i1 - i0 < 2) return;
       gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE);
       gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, tex);
-      const set = (u) => { gl.uniform1i(u.uPath, 0); gl.uniform2f(u.uRes, W, H); gl.uniform1f(u.uScroll, sy); gl.uniform1f(u.uTime, t); gl.uniform1f(u.uHead, head); gl.uniform1f(u.uFogA, fogA); gl.uniform1f(u.uFogB, fogB); gl.uniform1i(u.uZN, zones.length); if (zones.length) gl.uniform2fv(u.uZ, new Float32Array(zones.flat().concat(new Array(16 - zones.length * 2).fill(-1e6)))); };
+      const set = (u) => { gl.uniform1i(u.uPath, 0); gl.uniform2f(u.uRes, W, H); gl.uniform1f(u.uScroll, sy); gl.uniform1f(u.uTime, t); gl.uniform1f(u.uHead, head); gl.uniform1f(u.uFogA, fogA); gl.uniform1f(u.uFogB, fogB); gl.uniform1i(u.uZN, zones.length); if (u.uMergeFrom) gl.uniform1f(u.uMergeFrom, mergeFrom); if (zones.length) gl.uniform2fv(u.uZ, new Float32Array(zones.flat().concat(new Array(16 - zones.length * 2).fill(-1e6)))); };
       gl.useProgram(PL); set(uL); gl.uniform1f(uL.uBoost, boost); gl.uniform1i(uL.uFirst, i0); gl.bindVertexArray(vaoL);
       const n = (i1 - i0 + 1) * 2;
       gl.uniform1f(uL.uPass, 2); gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, n, 1);
