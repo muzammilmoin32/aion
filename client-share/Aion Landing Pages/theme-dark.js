@@ -154,7 +154,7 @@ void main(){
   else { hw=mix(70.,190.,1.-f); vW=0.; al=mix(.03,.07,1.-f); o=0.; }
   vec2 pos=a.xy+a.zw*(o+side*hw); pos.y-=uScroll;
   al*=1.+${gf(WV.boost.brighterGlow)}*uBoost;
-  if(uPass<.5) al*=1.+.6*(1.-sq)*step(uMergeFrom,a.y);   // wires merged at a turn glow brighter (below the hero only)
+  if(uPass<.5) al*=1.+.6*(1.-sq)*smoothstep(uMergeFrom,uMergeFrom+500.,a.y);   // wires merged at a turn glow brighter (below the hero only)
   vD=side*hw; vHW=hw; vA=al*headAt(a.y)*(1.+2.2*frontAt(a.y)*f); vC=aCol; vS=s; vPh=aS1.w; vSp=aS2.x;
   gl_Position=clip(pos);
 }`;
@@ -265,7 +265,7 @@ void main(){ float r2=dot(vUv,vUv); vec3 col=vCol; float a;
       if (WV.path.endSweep) {
         // one smooth sweep behind the closing card, then off the bottom (no tight corners)
         const last = cp[cp.length - 1];
-        const from = last[0] > 0.5 ? 1 : 0;
+        const from = (rtl ? 1 - last[0] : last[0]) > 0.5 ? 1 : 0;   // test the unmirrored side so Arabic mirrors the sweep
         cp.push([X(from ? 0.78 : 0.22), end.t - H * 0.2, 240, 1], [X(0.5), end.t + end.h * 0.5, 200, 0.9], [X(from ? 0.2 : 0.8), end.t + end.h + H * 0.3, 240, 1], [X(from ? 0.1 : 0.9), Math.max(docH, end.t + end.h) + H, 240, 1]);
       } else {
         cp.push([X(-0.25), end.t + 40, 230, 0.9], [X(0.45), end.t + end.h * 0.4, 90, 0.08], [X(1.25), end.t + end.h * 0.8, 240, 0.95], [X(0.5), Math.max(docH, end.t + end.h) + 300, 240, 1]);
@@ -287,7 +287,7 @@ void main(){ float r2=dot(vUv,vUv); vec3 col=vCol; float a;
         need -= d;
       }
       // the wires stay fully spread everywhere and gather into one bright bundle only right at each turn
-      const mg = clamp(Number(WV.path.mergeAtTurns) || 0, 0, 1); const mL = Math.max(60, Number(WV.path.mergeLength) || 220);
+      const mg = clamp(Number(WV.path.mergeAtTurns) || 0, 0, 1); const mLv = Number(WV.path.mergeLength); const mL = Number.isFinite(mLv) ? Math.max(60, mLv) : 220;
       if (mg > 0 && turns.length) for (const pt of pts) {
         let d2 = 1e18; for (const t of turns) { const dx = pt[0] - t[0]; const dy = pt[1] - t[1]; d2 = Math.min(d2, dx * dx + dy * dy); }
         const f = Math.exp(-d2 / (mL * mL));
