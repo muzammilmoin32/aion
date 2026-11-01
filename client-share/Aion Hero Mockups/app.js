@@ -115,7 +115,8 @@ const W = {
 };
 
 /* --------------------------------------------------------- screen building blocks */
-const ic = (name, cls = '') => `<svg class="ic ${cls}" aria-hidden="true"><use href="#i-${name}"/></svg>`;
+// a page that hosts the hero next to its own icon sprite renames ours (<body data-icons="gi-">) to avoid id clashes
+const ic = (name, cls = '') => `<svg class="ic ${cls}" aria-hidden="true"><use href="#${document.body.dataset.icons || 'i-'}${name}"/></svg>`;
 const bub = (name, tone = 'teal') => `<span class="bub ${tone}">${ic(name)}</span>`;
 const rv = (html, d = 0, cls = '') => `<div class="rv ${cls}" style="--d:${d}ms">${html}</div>`;
 const chk = (d = 0, cls = '') => `<span class="chk ${cls}" style="--d:${d}ms" aria-hidden="true">${ic('check')}</span>`;
@@ -882,7 +883,9 @@ const viewportH = () => {
 let closedHeaderH = 0;
 const headerH = () => {
   const header = document.querySelector('.site-header');
-  const open = document.getElementById('nav-panel').classList.contains('is-open');
+  if (!header) return 0;   // the hero embedded in another site's page
+  const panel = document.getElementById('nav-panel');
+  const open = !!panel && panel.classList.contains('is-open');
   if (!open || !closedHeaderH) closedHeaderH = header.offsetHeight; // remembered while the menu is closed
   return closedHeaderH;
 };
@@ -908,9 +911,12 @@ function scheduleFit(only) {
   }
 }
 const root = document.documentElement;
+// <body data-embed="hero">: the hero runs inside another site's page (no header, menu or theme of ours;
+// leave its title, light/dark theme and language alone)
+const EMBED = () => document.body.dataset.embed === 'hero';
 
 function applyI18n() {
-  document.title = L(UI.title);
+  if (!EMBED()) document.title = L(UI.title);
   document.querySelectorAll('[data-i18n]').forEach((el) => { el.innerHTML = L(UI[el.dataset.i18n]); });
   document.querySelectorAll('[data-i18n-aria]').forEach((el) => { el.setAttribute('aria-label', L(UI[el.dataset.i18nAria])); });
   document.querySelectorAll('[data-opt-n]').forEach((el) => { el.textContent = `${L(UI.option)} ${el.dataset.optN}`; });
@@ -924,7 +930,7 @@ function setLang(lang) {
   applyI18n();
   heroes.forEach((h) => h.render());
   scheduleFit();
-  store.set('lang', lang);
+  if (!EMBED()) store.set('lang', lang);   // a host page must not overwrite the main site's saved choice
   document.dispatchEvent(new CustomEvent('aion:lang', { detail: lang }));
 }
 
@@ -932,7 +938,7 @@ function setLens(lens) {
   state.lens = lens;
   root.dataset.lens = lens;
   document.querySelectorAll('button[data-lens]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.lens === lens)));
-  store.set('lens', lens);
+  if (!EMBED()) store.set('lens', lens);
   document.dispatchEvent(new CustomEvent('aion:lens', { detail: lens }));
 }
 
@@ -984,7 +990,7 @@ function setBehind(on) {
     h.trace.setAttribute('aria-hidden', String(!on));
   });
   scheduleFit();
-  store.set('behind', on ? '1' : '0');
+  if (!EMBED()) store.set('behind', on ? '1' : '0');
 }
 
 function setTheme(theme) {
@@ -1031,7 +1037,7 @@ function init() {
   // Anchor jumps land exactly under the sticky header, whatever its height at this width.
   const header = document.querySelector('.site-header');
   // Height without the open mobile menu, so opening it doesn't resize every hero.
-  new ResizeObserver(() => { root.style.setProperty('--header-h', `${headerH()}px`); scheduleFit(); }).observe(header);
+  if (header) new ResizeObserver(() => { root.style.setProperty('--header-h', `${headerH()}px`); scheduleFit(); }).observe(header);
   let lastW = window.innerWidth;
   let lastH = viewportH();
   window.addEventListener('resize', () => {
@@ -1046,27 +1052,49 @@ function init() {
 
   // Booking dialog (two fields only, per the script)
   const dlg = document.getElementById('booking');
-  const form = dlg.querySelector('form');
-  const doneEl = dlg.querySelector('.dlg-done');
+  if (dlg) wireBooking(dlg);
 
   // Mobile menu
   const menuBtn = document.querySelector('.menu-btn');
   const panel = document.getElementById('nav-panel');
+  if (menuBtn && panel) wireMenu(menuBtn, panel, dlg);
+  // Placeholder menu items: no destinations yet.
+  document.querySelectorAll('.nav-list a[href="#"]').forEach((a) => a.addEventListener('click', (e) => e.preventDefault()));
+
+  const pick = (k, allowed) => (allowed.includes(store.get(k)) ? store.get(k) : allowed[0]);
+  if (!EMBED()) setTheme(pick('theme', ['auto', 'light', 'dark']));
+  setLens(EMBED() ? (root.dataset.lens === 'technical' ? 'technical' : 'business') : pick('lens', ['business', 'technical']));
+  setLang(EMBED() ? 'en' : pick('lang', ['en', 'ar']));
+  setBehind(store.get('behind') === '1');
+
+  let last = performance.now();
+  const loop = (now) => {
+    const dt = Math.min(100, now - last);
+    last = now;
+    heroes.forEach((h) => h.tick(dt));
+    requestAnimationFrame(loop);
+  };
+  requestAnimationFrame(loop);
+}
+
+function wireMenu(menuBtn, panel, dlg) {
   menuBtn.addEventListener('click', () => {
     const open = menuBtn.getAttribute('aria-expanded') !== 'true';
     menuBtn.setAttribute('aria-expanded', String(open));
     panel.classList.toggle('is-open', open);
   });
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && !dlg.open && panel.classList.contains('is-open')) {
+    if (e.key === 'Escape' && !(dlg && dlg.open) && panel.classList.contains('is-open')) {
       menuBtn.setAttribute('aria-expanded', 'false');
       panel.classList.remove('is-open');
       menuBtn.focus();
     }
   });
-  // Placeholder menu items: no destinations yet.
-  document.querySelectorAll('.nav-list a[href="#"]').forEach((a) => a.addEventListener('click', (e) => e.preventDefault()));
+}
 
+function wireBooking(dlg) {
+  const form = dlg.querySelector('form');
+  const doneEl = dlg.querySelector('.dlg-done');
   let opener = null;
   document.addEventListener('click', (e) => {
     const b = e.target.closest('[data-open-booking]');
@@ -1086,21 +1114,6 @@ function init() {
   dlg.querySelectorAll('.dlg-close').forEach((b) => b.addEventListener('click', () => dlg.close()));
   dlg.addEventListener('click', (e) => { if (e.target === dlg) dlg.close(); });
   dlg.addEventListener('close', () => opener && opener.focus());
-
-  const pick = (k, allowed) => (allowed.includes(store.get(k)) ? store.get(k) : allowed[0]);
-  setTheme(pick('theme', ['auto', 'light', 'dark']));
-  setLens(pick('lens', ['business', 'technical']));
-  setLang(pick('lang', ['en', 'ar']));
-  setBehind(store.get('behind') === '1');
-
-  let last = performance.now();
-  const loop = (now) => {
-    const dt = Math.min(100, now - last);
-    last = now;
-    heroes.forEach((h) => h.tick(dt));
-    requestAnimationFrame(loop);
-  };
-  requestAnimationFrame(loop);
 }
 
 document.addEventListener('DOMContentLoaded', init);

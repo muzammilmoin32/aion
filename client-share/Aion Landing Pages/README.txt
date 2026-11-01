@@ -9,6 +9,7 @@ WHAT YOU ARE LOOKING AT
 The Aion landing page in the dark "Night" theme: index.html.
 landing-d/index.html is a second design ("Tilt") with tilted, scroll-driven sections.
 index-old.html, landing-b/ and landing-c/ are the earlier layouts A, B and C.
+landing-e/ and landing-f/ are the client's particle theme with the 4D glass section (landing-f adds the light lines).
 classic/ holds the same layouts as they looked before the dark theme (light).
 Use "Other layouts" (top right) on any page to switch between them and the hero mockups.
 Move the mouse over the hero to tilt the glass stage; scroll to see each section animate.

@@ -16,13 +16,16 @@
     { href: 'landing-b/index.html', root: 'site', en: 'Landing B', ar: 'الصفحة ب', noteEn: 'Second layout, night theme', noteAr: 'التصميم الثاني، الطابع الليلي' },
     { href: 'landing-c/index.html', root: 'site', en: 'Landing C', ar: 'الصفحة ج', noteEn: 'Third layout, night theme', noteAr: 'التصميم الثالث، الطابع الليلي' },
     { href: 'index.html', root: 'mockups', path: 'mockups/', en: 'Hero section mockups', ar: 'نماذج القسم الرئيسي', noteEn: 'Eight hero options on one page', noteAr: 'ثمانية خيارات للقسم الرئيسي' },
+    // the client's particle theme (reference/aion-v2.html) with the main page's glass section; built by tools/build-theme-pages.js
+    { group: 'v2', href: 'landing-e/index.html', root: 'site', en: 'Particle theme', ar: 'طابع الجزيئات', noteEn: 'With the 4D glass section', noteAr: 'مع القسم الزجاجي رباعي الأبعاد' },
+    { group: 'v2', href: 'landing-f/index.html', root: 'site', en: 'Particle theme + lines', ar: 'طابع الجزيئات مع الخطوط', noteEn: 'Plus four light lines on scroll', noteAr: 'مع أربعة خطوط ضوئية عند التمرير' },
     // the same layouts as they were before the dark theme (restored into classic/)
     { group: 'classic', href: 'classic/index.html', root: 'site', en: 'Landing A', ar: 'الصفحة أ', noteEn: 'Light, before the theme', noteAr: 'فاتح، قبل الطابع الليلي' },
     { group: 'classic', href: 'classic/landing-b/index.html', root: 'site', en: 'Landing B', ar: 'الصفحة ب', noteEn: 'Light, before the theme', noteAr: 'فاتح، قبل الطابع الليلي' },
     { group: 'classic', href: 'classic/landing-c/index.html', root: 'site', en: 'Landing C', ar: 'الصفحة ج', noteEn: 'Light, before the theme', noteAr: 'فاتح، قبل الطابع الليلي' },
     { group: 'classic', href: 'classic/mockups/index.html', root: 'site', en: 'Hero section mockups', ar: 'نماذج القسم الرئيسي', noteEn: 'Five light hero options', noteAr: 'خمسة خيارات فاتحة للقسم الرئيسي' },
   ];
-  const GROUPS = { night: ['Night theme', 'الطابع الليلي'], classic: ['Before the theme', 'قبل الطابع الليلي'] };
+  const GROUPS = { v2: ['Particle theme', 'طابع الجزيئات'], night: ['Night theme', 'الطابع الليلي'], classic: ['Before the theme', 'قبل الطابع الليلي'] };
   const TXT = { btn: ['Other layouts', 'تصاميم أخرى'], label: ['Layouts', 'التصاميم'], here: ['you are here', 'أنت هنا'] };
 
   const me = document.currentScript && document.currentScript.src;

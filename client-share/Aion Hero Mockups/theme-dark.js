@@ -13,7 +13,12 @@
  */
 (() => {
   const root = document.documentElement;
-  root.dataset.skin = 'night';
+  // window.AION_STREAM_ONLY = { from: '#section', end: '#closing' }: another site's page borrows just the light
+  // stream, starting at that section (no loader, cursor, eased scroll, header or skin of ours)
+  const ONLY = window.AION_STREAM_ONLY || null;
+  const heroSel = (ONLY && ONLY.from) || '.hero';
+  const endOf = () => (ONLY && ONLY.end ? document.querySelector(ONLY.end) : document.getElementById('contact'));
+  if (!ONLY) root.dataset.skin = 'night';
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const coarse = matchMedia('(pointer: coarse)').matches;
   const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
@@ -23,7 +28,7 @@
   const base = () => document.body.dataset.base || '';
   let seenLoader = false;
   try { seenLoader = sessionStorage.getItem('aion-night-loader') === '1'; } catch (e) { /* storage blocked */ }
-  const showLoader = !reduce && !seenLoader;
+  const showLoader = !ONLY && !reduce && !seenLoader;
   if (showLoader) root.classList.add('th-boot');
   let finished = false;
   let finish = () => { root.classList.remove('th-boot'); };
@@ -45,7 +50,7 @@
   const SS = (() => {
     // settings: window.AION_SCROLL (waves-settings.js). Touch screens keep their native momentum scrolling.
     const SC = (() => { const u = window.AION_SCROLL || {}; const n = (v, d, lo, hi) => (v !== null && v !== '' && Number.isFinite(+v) ? Math.min(hi, Math.max(lo, +v)) : d);
-      return { enabled: u.enabled !== false, smoothness: n(u.smoothness, 1, 0.3, 3), wheelSpeed: n(u.wheelSpeed, 1, 0.3, 3), keyboard: u.keyboard !== false }; })();
+      return { enabled: u.enabled !== false && !ONLY, smoothness: n(u.smoothness, 1, 0.3, 3), wheelSpeed: n(u.wheelSpeed, 1, 0.3, 3), keyboard: u.keyboard !== false }; })();
     if (reduce || coarse || !SC.enabled) return { start() {}, to(y) { scrollTo(0, y); } };
     const rate = 5.5 / SC.smoothness;   // higher smoothness = longer, softer glide
     let aim = null;   // { el, off } while gliding to an in-page anchor
@@ -131,11 +136,11 @@
     const TW = 2048;
     const COMMON = `#version 300 es
 precision highp float;
-uniform sampler2D uPath; uniform vec2 uRes; uniform float uScroll,uTime,uHead,uFogA,uFogB; uniform vec2 uZ[8]; uniform int uZN;
+uniform sampler2D uPath; uniform vec2 uRes; uniform float uScroll,uTime,uHead,uFogA,uFogB,uStart; uniform vec2 uZ[8]; uniform int uZN;
 vec4 P(int i,int k){return texelFetch(uPath,ivec2(i%${TW},(i/${TW})*2+k),0);}
 // soft focus inside every marked section (.fogzone), sharp in the gaps between them
 float focusAt(float y){ float b=0.; for(int i=0;i<8;i++){ if(i>=uZN) break; vec2 z=uZ[i]; b=max(b, smoothstep(z.x,z.x+${gf(WV.softEdge)},y)*(1.-smoothstep(z.y-${gf(WV.softEdge)},z.y,y))); } return 1.-b*${gf(WV.blurAmount)}; }   // blurAmount: how far out of focus the soft zones go
-float headAt(float y){return smoothstep(uHead+30.,uHead-220.,y);}
+float headAt(float y){return smoothstep(uHead+30.,uHead-220.,y)*smoothstep(uStart-60.,uStart+220.,y);}   // nothing above the start section
 float frontAt(float y){float d=(y-uHead+70.)/70.;return exp(-d*d);}
 vec4 clip(vec2 p){return vec4(p.x/uRes.x*2.-1.,1.-p.y/uRes.y*2.,0.,1.);}
 `;
@@ -216,27 +221,30 @@ void main(){ float r2=dot(vUv,vUv); vec3 col=vCol; float a;
     }
     const PL = prog(VS_LINE, FS_LINE); const PS = prog(VS_SPR, FS_SPR);
     if (!PL || !PS) return null;
-    const names = ['uPath', 'uRes', 'uScroll', 'uTime', 'uHead', 'uFogA', 'uFogB', 'uFirst', 'uPass', 'uN', 'uKnotI', 'uBoost', 'uZ', 'uZN', 'uMergeFrom'];
+    const names = ['uPath', 'uRes', 'uScroll', 'uTime', 'uHead', 'uFogA', 'uFogB', 'uFirst', 'uPass', 'uN', 'uKnotI', 'uBoost', 'uZ', 'uZN', 'uMergeFrom', 'uStart'];
     const uL = {}; const uS = {};
     names.forEach((n) => { uL[n] = gl.getUniformLocation(PL, n); uS[n] = gl.getUniformLocation(PS, n); });
     const tex = gl.createTexture(); const vaoL = gl.createVertexArray(); const vaoS = gl.createVertexArray(); const bufL = gl.createBuffer(); const bufS = gl.createBuffer();
     let boost = 0;
     let zones = [];
-    let W; let H; let dpr; let pts = []; let pinch = 0; let head = 0; let built = false; let fogA = 0; let fogB = 0; let nStr = 0; let nSpr = 0; let started = false; let startT = 0; let maxS = 0; let mergeFrom = 1e9;
+    let W; let H; let dpr; let pts = []; let pinch = 0; let head = 0; let built = false; let fogA = 0; let fogB = 0; let nStr = 0; let nSpr = 0; let started = false; let startT = 0; let maxS = 0; let mergeFrom = 1e9; let startY = -1e9;
     const GLOW = Math.round(coarse ? WV.glowLayersMobile : WV.glowLayers);
     c.addEventListener('webglcontextlost', (e) => { e.preventDefault(); built = false; });
     const abs = (el) => { const r = el.getBoundingClientRect(); return { t: r.top + scrollY, h: r.height }; };
 
     function build() {
-      const heroEl = document.querySelector('.hero');
+      const heroEl = document.querySelector(heroSel);
       if (!heroEl) return;
       dpr = coarse ? 1 : Math.min(1.5, devicePixelRatio || 1); W = innerWidth; H = innerHeight;
       c.width = Math.round(W * dpr); c.height = Math.round(H * dpr); gl.viewport(0, 0, c.width, c.height);
       const k = Math.min(1.15, Math.max(0.6, W / 1400)) * WV.ribbonWidth;
-      const hero = abs(heroEl); const hh = hero.t + hero.h;
+      const hero = abs(heroEl); const hh = hero.t + hero.h; const h0 = hero.t; const hH = hero.h;
+      // the path is laid out over 0…hh as it always was; in stream-only mode over the start section itself
+      const y0 = ONLY && ONLY.from ? h0 : 0; const span = ONLY && ONLY.from ? hH : hh;
+      startY = ONLY && ONLY.from ? h0 : -1e9;
       const docH = document.documentElement.scrollHeight;
       maxS = Math.max(0, docH - H);
-      const endEl = document.getElementById('contact');
+      const endEl = endOf();
       const end = endEl ? abs(endEl) : { t: docH - H, h: H };
       // soft (out-of-focus) zone: the sections between the hero and the close
       // soft zones only where the page marks them (.fogzone, up to 8); the stream stays sharp elsewhere
@@ -253,10 +261,10 @@ void main(){ float r2=dot(vUv,vUv); vec3 col=vCol; float a;
       const rtl = root.dir === 'rtl';
       const X = (f) => (rtl ? 1 - f : f);
       const vx = W < 1000 ? WV.path.brightPointXMobile : WV.path.brightPointX;              // bright point sits beside the phone (away from the copy on phones)
-      const cp = [[X(1.18), -hh * 0.32, 300, 1], [X(0.86), hh * 0.18, 240, 0.6], [X(vx), hh * 0.6, 40, 0], [X(0.3), hh * 0.92, 190, 0.5], [X(0.22), hh * 1.18, 230, 0.85]];
-      let y = hh * 1.18; let n = 0; const stepY = Math.max(700, H * WV.path.bendEveryScreens); const stopY = end.t - H * (WV.path.endSweep ? 0.9 : 0.35);
+      const cp = [[X(1.18), y0 - span * 0.32, 300, 1], [X(0.86), y0 + span * 0.18, 240, 0.6], [X(vx), y0 + span * 0.6, 40, 0], [X(0.3), y0 + span * 0.92, 190, 0.5], [X(0.22), y0 + span * 1.18, 230, 0.85]];
+      let y = y0 + span * 1.18; let n = 0; const stepY = Math.max(700, H * WV.path.bendEveryScreens); const stopY = end.t - H * (WV.path.endSweep ? 0.9 : 0.35);
       // wide edge-to-edge swings only inside a soft zone (with blurAll: every bend up to the last section); otherwise a gentle meander that stays clear of the text column
-      mergeFrom = hh * 1.18;
+      mergeFrom = y0 + span * 1.18;
       const turns = [];   // [x px, y] of every bend, where the wires merge
       while (y + stepY < stopY) {
         y += stepY; n += 1; const sw = inZone(y) ? WV.path.swingInSoftSections : WV.path.swingElsewhere;
@@ -314,9 +322,9 @@ void main(){ float r2=dot(vUv,vUv); vec3 col=vCol; float a;
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA32F, TW, rows * 2, 0, gl.RGBA, gl.FLOAT, data);
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
       // fibres: Aion teal, a cyan core, a few white
-      const Rn = ((s) => () => { s = Math.sin(s * 9301 + 49297) * 233280; return s - Math.floor(s); })(11); const N = Math.max(8, Math.round(WV.fibres)); const st = [];
+      const Rn = ((s) => () => { s = Math.sin(s * 9301 + 49297) * 233280; return s - Math.floor(s); })(11); const N = Math.max(1, Math.round(WV.fibres)); const st = [];
       for (let i = 0; i < N; i += 1) {
-        const f = (i / (N - 1)) * 2 - 1; const mid = Math.abs(f + 0.1) < 0.35; const r = Rn();
+        const f = N > 1 ? (i / (N - 1)) * 2 - 1 : 0; const mid = Math.abs(f + 0.1) < 0.35; const r = Rn();
         const col = r < 0.06 ? WV.colors.white : (mid && r < 0.55) ? WV.colors.core : WV.colors.main;
         st.push({ f, col, a: (0.12 + Rn() * 0.32) * WV.fibreBrightness, lw: (0.45 + Rn() * 0.8) * WV.fibreThickness, ph: Rn() * 6.283, nz: (Rn() - 0.5) * 2, core: Math.pow(Rn(), 1.6) * (Rn() < 0.5 ? -1 : 1), sp: 0.2 + Rn() * 0.6 });
       }
@@ -362,7 +370,7 @@ void main(){ float r2=dot(vUv,vUv); vec3 col=vCol; float a;
       if (i1 - i0 < 2) return;
       gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE);
       gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, tex);
-      const set = (u) => { gl.uniform1i(u.uPath, 0); gl.uniform2f(u.uRes, W, H); gl.uniform1f(u.uScroll, sy); gl.uniform1f(u.uTime, t); gl.uniform1f(u.uHead, head); gl.uniform1f(u.uFogA, fogA); gl.uniform1f(u.uFogB, fogB); gl.uniform1i(u.uZN, zones.length); if (u.uMergeFrom) gl.uniform1f(u.uMergeFrom, mergeFrom); if (zones.length) gl.uniform2fv(u.uZ, new Float32Array(zones.flat().concat(new Array(16 - zones.length * 2).fill(-1e6)))); };
+      const set = (u) => { gl.uniform1i(u.uPath, 0); gl.uniform2f(u.uRes, W, H); gl.uniform1f(u.uScroll, sy); gl.uniform1f(u.uTime, t); gl.uniform1f(u.uHead, head); gl.uniform1f(u.uFogA, fogA); gl.uniform1f(u.uFogB, fogB); gl.uniform1i(u.uZN, zones.length); if (u.uMergeFrom) gl.uniform1f(u.uMergeFrom, mergeFrom); gl.uniform1f(u.uStart, startY); if (zones.length) gl.uniform2fv(u.uZ, new Float32Array(zones.flat().concat(new Array(16 - zones.length * 2).fill(-1e6)))); };
       gl.useProgram(PL); set(uL); gl.uniform1f(uL.uBoost, boost); gl.uniform1i(uL.uFirst, i0); gl.bindVertexArray(vaoL);
       const n = (i1 - i0 + 1) * 2;
       gl.uniform1f(uL.uPass, 2); gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, n, 1);
@@ -392,10 +400,11 @@ void main(){ float r2=dot(vUv,vUv); vec3 col=vCol; float a;
     // full brightness in the hero; dimmed behind the reading sections so text stays legible
     let dimLast = -1;
     loopFns.push(() => {
-      const heroEl = document.querySelector('.hero'); if (!heroEl) return;
-      const hEnd = heroEl.offsetTop + heroEl.offsetHeight;
-      const ctaEl = document.getElementById('contact');
-      const k = clamp((scrollY + innerHeight * 0.5 - hEnd * 0.75) / (innerHeight * 0.6));
+      const heroEl = document.querySelector(heroSel); if (!heroEl) return;
+      const hb = heroEl.getBoundingClientRect(); const hTop = hb.top + scrollY;
+      const ctaEl = endOf();
+      const dimAt = ONLY && ONLY.from ? hTop + hb.height * 0.75 : (hTop + hb.height) * 0.75;   // unchanged for the main pages
+      const k = clamp((scrollY + innerHeight * 0.5 - dimAt) / (innerHeight * 0.6));
       let o = WV.heroBrightness - k * (WV.heroBrightness - WV.sectionBrightness);
       if (ctaEl) { const c = ctaEl.getBoundingClientRect(); if (c.top < innerHeight * 0.6) o = Math.max(o, WV.closingBrightness); }
       if (Math.abs(o - dimLast) > 0.01) { c.style.opacity = o.toFixed(2); dimLast = o; }
@@ -476,6 +485,14 @@ void main(){ float r2=dot(vUv,vUv); vec3 col=vCol; float a;
   function init() {
     const body = document.body;
     const canvas = document.createElement('canvas'); canvas.id = 'th-stream'; canvas.setAttribute('aria-hidden', 'true');
+    if (ONLY) {
+      // just the stream: the host page keeps its own loader, cursor, scrolling and header
+      body.prepend(canvas);
+      const S = reduce || !WV.enabled ? null : StreamGL(canvas);
+      requestAnimationFrame(loop);
+      if (S) S.start();
+      return;
+    }
     const grain = document.createElement('div'); grain.id = 'th-grain'; grain.setAttribute('aria-hidden', 'true');
     body.prepend(grain); body.prepend(canvas);
     const Stream = reduce || !WV.enabled ? null : StreamGL(canvas);
