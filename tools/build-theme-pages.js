@@ -387,10 +387,59 @@ function page(withLines) {
 .hero-cta.ghost { gap: 10px; background: rgb(255 255 255 / .08); color: #fff; border: 1px solid rgb(255 255 255 / .45); text-decoration: none; box-shadow: none; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
 .hero-cta.ghost span { font-size: 12px; }
 :root[dir="rtl"] .hero-cta.ghost span { display: inline-block; transform: scaleX(-1); }
-.hero-micro { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 22px; margin: 22px 0 0; font-family: var(--font-mono); font-size: 12px; color: rgb(255 255 255 / .82); }
+.hero-micro { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 22px; margin: 22px 0 0; font-family: var(--font-mono); font-size: 12px; color: rgb(255 255 255 / .88); text-shadow: 0 1px 10px rgb(0 40 38 / .75), 0 0 2px rgb(0 40 38 / .6); }
 .hero-micro a { flex-basis: 100%; color: #fff; text-decoration: underline; text-underline-offset: 4px; }
 </style>
 </head>`, 'head end (hero)');
+  /* smooth scroll (the theme's Lenis), made complete:
+     - panels that scroll on their own keep the wheel (the mobile menu; the layouts list opts out in layouts.js)
+     - the page holds still behind the full-screen mobile menu and the booking dialog
+     - keyboard scrolling glides like the wheel (arrows, Page Up/Down, Space, Home/End) */
+  h = must(h, '<div class="mega" id="mega" hidden>', '<div class="mega" id="mega" data-lenis-prevent hidden>', 'mega: lenis opt-out');
+  h = must(h, "if (root.classList.contains('intro')) lenis.stop();", "if (root.classList.contains('intro')) lenis.stop();\n    window.__aionLenis = lenis;", 'lenis: shared');
+  h = must(h, '</body>', `<script>
+/* smooth scroll: hold the page behind full-screen layers; keyboard keys glide (built by tools/build-theme-pages.js) */
+(() => {
+  const L = () => window.__aionLenis;
+  if (!L()) return;   // reduced motion or no Lenis: the browser's own scrolling
+  const burger = document.getElementById('burger'), mega = document.getElementById('mega');
+  const held = new Set();
+  const hold = (why, on) => {
+    const lenis = L(); if (!lenis) return;
+    if (on) held.add(why); else held.delete(why);
+    if (held.size) lenis.stop();
+    else if (!document.documentElement.classList.contains('intro')) lenis.start();
+  };
+  const fullMenu = () => mega && !mega.hidden && burger && getComputedStyle(burger).display !== 'none';   // phone menu covers the page
+  if (mega) new MutationObserver(() => hold('menu', fullMenu())).observe(mega, { attributes: true, attributeFilter: ['hidden'] });
+  document.querySelectorAll('dialog').forEach((d) => new MutationObserver(() => hold('dialog:' + d.id, d.open)).observe(d, { attributes: true, attributeFilter: ['open'] }));
+
+  const SKIP = 'input, textarea, select, [contenteditable=""], [contenteditable="true"], [role="tablist"], [role="listbox"], [role="menu"], [role="slider"], .chips, .lay, #mega';
+  addEventListener('keydown', (e) => {
+    const lenis = L();
+    if (!lenis || lenis.isStopped || e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey) return;
+    const t = e.target;
+    if (t && t.closest && t.closest(SKIP)) return;                                                   // keys that belong to a control
+    if (e.key === ' ' && t && t.closest && t.closest('button, a, summary, [role="button"]')) return;  // Space presses the button
+    const step = innerHeight - 110;   // a screen, less the header and a little overlap
+    let to;
+    switch (e.key) {
+      case 'ArrowDown': to = lenis.targetScroll + 140; break;
+      case 'ArrowUp': to = lenis.targetScroll - 140; break;
+      case 'PageDown': to = lenis.targetScroll + step; break;
+      case 'PageUp': to = lenis.targetScroll - step; break;
+      case ' ': to = lenis.targetScroll + (e.shiftKey ? -step : step); break;
+      case 'Home': to = 0; break;
+      case 'End': to = lenis.limit; break;
+      default: return;
+    }
+    if (e.shiftKey && e.key !== ' ') return;
+    e.preventDefault();
+    lenis.scrollTo(Math.max(0, Math.min(lenis.limit, to)), { duration: e.repeat ? 0.3 : 0.9 });   // held key: short glides that keep up
+  });
+})();
+</script>
+</body>`, 'smooth scroll: keyboard and holds');
   // 06 demos: the v2 intro line and journey names
   h = must(h, '<p class="lede">Every demo runs on a fictional reference bank, on the same layer a live bank uses.</p>', '<p class="lede">Every demo runs on a fictional reference bank, on the same layer a live bank uses. Turn on what sits behind it to see each service fire.</p>', 'demos intro');
   h = must(h, "name:'Cash-flow lending'", "name:'SME cash-flow lending'", 'journey name: SME cash-flow lending');
