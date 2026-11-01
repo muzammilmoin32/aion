@@ -46,7 +46,7 @@ function helpers() {
       return [...new Set(textNodes().filter((n) => /[؀-ۿ]/.test(n.nodeValue) && !n.parentElement.closest('[lang="ar"]')).map((n) => n.nodeValue.trim()))];
     },
     snap() {
-      const text = new Map(); textNodes().filter((n) => !n.parentElement.closest('#langBtn')).forEach((n) => text.set(n, n.nodeValue));   // #langBtn is rebuilt by design (asserted separately)
+      const text = new Map(); textNodes().filter((n) => !n.parentElement.closest('#langBtn, #screen, #prog, #ltrace, #kpiText')).forEach((n) => text.set(n, n.nodeValue));   // #langBtn is rebuilt by design (asserted separately)
       const attr = new Map(); attrEls().forEach((el) => { const o = {}; ATTRS.forEach((a) => { if (el.hasAttribute(a)) o[a] = el.getAttribute(a); }); attr.set(el, o); });
       return { text, attr };
     },
@@ -79,7 +79,7 @@ function helpers() {
     const ctx = await b.newContext({ viewport: { width: w, height: h } });
     const p = await ctx.newPage(); const errs = [];
     p.on('pageerror', (e) => errs.push('pageerror: ' + e.message));
-    p.on('requestfailed', (r) => errs.push('requestfailed: ' + r.url() + ' ' + (r.failure() || {}).errorText));
+    p.on('requestfailed', (r) => /\.mp4$/.test(r.url()) && /ERR_ABORTED/.test((r.failure() || {}).errorText) ? 0 : errs.push('requestfailed: ' + r.url() + ' ' + (r.failure() || {}).errorText));
     p.on('response', (r) => { if (r.status() >= 400) errs.push('HTTP ' + r.status() + ' ' + r.url()); });
     await p.addInitScript(helpers);
     if (init) await p.addInitScript(init);

@@ -165,12 +165,13 @@ void main(){
 }`;
     const FS_LINE = `#version 300 es
 precision highp float;
-uniform float uPass,uTime; in float vD,vHW,vW,vA,vS,vPh,vSp; in vec3 vC; out vec4 o;
+uniform float uPass,uTime; uniform vec4 uTint; in float vD,vHW,vW,vA,vS,vPh,vSp; in vec3 vC; out vec4 o;
+vec3 tint(vec3 c){ if(uTint.w<=0.) return c; float mx=max(c.r,max(c.g,c.b)),mn=min(c.r,min(c.g,c.b)); return mix(c,vec3(mn)+uTint.rgb*(mx-mn),uTint.w); }
 void main(){ float a;
   float pulse=pow(.5+.5*sin(vS*46.-uTime*(.45+vSp*.75)+vPh*7.),10.);
   if(uPass<.5) a=clamp(vW+.65-abs(vD),0.,1.)*(.62+1.5*pulse);
   else { float t=abs(vD)/vHW; a=exp(-t*t*3.2); }
-  a*=vA; o=vec4(vC*a,a); }`;
+  a*=vA; o=vec4(tint(vC)*a,a); }`;
     const VS_SPR = COMMON + `
 uniform float uN,uKnotI,uBoost;
 in vec4 aP; in vec4 aK;      // aP: u|x, offset|y, speed px/s, radius   aK: phase, kind, alpha, cyan mix
@@ -202,12 +203,13 @@ void main(){
 }`;
     const FS_SPR = `#version 300 es
 precision highp float;
-in vec2 vUv; in float vA,vKind; in vec3 vCol; out vec4 o;
+in vec2 vUv; in float vA,vKind; in vec3 vCol; uniform vec4 uTint; out vec4 o;
+vec3 tint(vec3 c){ if(uTint.w<=0.) return c; float mx=max(c.r,max(c.g,c.b)),mn=min(c.r,min(c.g,c.b)); return mix(c,vec3(mn)+uTint.rgb*(mx-mn),uTint.w); }
 void main(){ float r2=dot(vUv,vUv); vec3 col=vCol; float a;
   if(vKind>.5&&vKind<1.5){ a=.5*exp(-r2*60.)+.22*exp(-r2*12.)+.07*exp(-r2*3.); col=mix(${gc(WV.colors.point)},vec3(.92,1.,.98),exp(-r2*40.)); }
   else if(vKind>1.5&&vKind<2.5){ float r=sqrt(r2); a=(smoothstep(1.,.86,r)*.55+.45*exp(-r2*2.2))*smoothstep(1.,.97,r); }
   else { a=exp(-r2*4.)+.6*exp(-r2*14.); }
-  a*=vA; if(a<.002) discard; o=vec4(col*a,a); }`;
+  a*=vA; if(a<.002) discard; o=vec4(tint(col)*a,a); }`;
     function prog(vs, fs) {
       const p = gl.createProgram();
       for (const [t, src] of [[gl.VERTEX_SHADER, vs], [gl.FRAGMENT_SHADER, fs]]) {
@@ -221,11 +223,22 @@ void main(){ float r2=dot(vUv,vUv); vec3 col=vCol; float a;
     }
     const PL = prog(VS_LINE, FS_LINE); const PS = prog(VS_SPR, FS_SPR);
     if (!PL || !PS) return null;
-    const names = ['uPath', 'uRes', 'uScroll', 'uTime', 'uHead', 'uFogA', 'uFogB', 'uFirst', 'uPass', 'uN', 'uKnotI', 'uBoost', 'uZ', 'uZN', 'uMergeFrom', 'uStart'];
+    const names = ['uPath', 'uRes', 'uScroll', 'uTime', 'uHead', 'uFogA', 'uFogB', 'uFirst', 'uPass', 'uN', 'uKnotI', 'uBoost', 'uZ', 'uZN', 'uMergeFrom', 'uStart', 'uTint'];
     const uL = {}; const uS = {};
     names.forEach((n) => { uL[n] = gl.getUniformLocation(PL, n); uS[n] = gl.getUniformLocation(PS, n); });
     const tex = gl.createTexture(); const vaoL = gl.createVertexArray(); const vaoS = gl.createVertexArray(); const bufL = gl.createBuffer(); const bufS = gl.createBuffer();
     let boost = 0;
+    // AION_STREAM_ONLY.tint = { section: '#id', color: [r, g, b] }: the lines take that colour while the section is the
+    // page's active scene (body[data-scene], as the theme sets it) or, without scenes, while it holds the middle of the screen
+    const TINT = ONLY && ONLY.tint && ONLY.tint.section && Array.isArray(ONLY.tint.color) && ONLY.tint.color.length >= 3 ? ONLY.tint : null;
+    const tintRGB = TINT ? (() => { const c = TINT.color.map((x) => clamp(Number(x) / 255 || 0)); const mx = Math.max(...c), mn = Math.min(...c); return c.map((x) => (mx > mn ? (x - mn) / (mx - mn) : 1)); })() : [0, 0, 0];
+    let tintK = 0; let tintEl = null;
+    const tintOn = () => {
+      if (!tintEl || !tintEl.isConnected) tintEl = document.querySelector(TINT.section);
+      const el = tintEl; if (!el) return false;
+      if (el.dataset.scene && document.body.dataset.scene) return document.body.dataset.scene === el.dataset.scene;
+      const r = el.getBoundingClientRect(); return r.top < innerHeight * 0.5 && r.bottom > innerHeight * 0.5;
+    };
     let zones = [];
     let W; let H; let dpr; let pts = []; let pinch = 0; let head = 0; let built = false; let fogA = 0; let fogB = 0; let nStr = 0; let nSpr = 0; let started = false; let startT = 0; let maxS = 0; let mergeFrom = 1e9; let startY = -1e9;
     const GLOW = Math.round(coarse ? WV.glowLayersMobile : WV.glowLayers);
@@ -371,7 +384,9 @@ void main(){ float r2=dot(vUv,vUv); vec3 col=vCol; float a;
       gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE);
       gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, tex);
       const set = (u) => { gl.uniform1i(u.uPath, 0); gl.uniform2f(u.uRes, W, H); gl.uniform1f(u.uScroll, sy); gl.uniform1f(u.uTime, t); gl.uniform1f(u.uHead, head); gl.uniform1f(u.uFogA, fogA); gl.uniform1f(u.uFogB, fogB); gl.uniform1i(u.uZN, zones.length); if (u.uMergeFrom) gl.uniform1f(u.uMergeFrom, mergeFrom); gl.uniform1f(u.uStart, startY); if (zones.length) gl.uniform2fv(u.uZ, new Float32Array(zones.flat().concat(new Array(16 - zones.length * 2).fill(-1e6)))); };
-      gl.useProgram(PL); set(uL); gl.uniform1f(uL.uBoost, boost); gl.uniform1i(uL.uFirst, i0); gl.bindVertexArray(vaoL);
+      if (TINT) tintK += ((tintOn() ? 1 : 0) - tintK) * (reduce ? 1 : 1 - Math.exp(-dt * 4));   // about a second, like the particles' colour blend
+      const tw = TINT && tintK > 0.002 ? tintK : 0;   // uniforms start at 0 (off): the main pages never set it
+      gl.useProgram(PL); set(uL); if (TINT) gl.uniform4f(uL.uTint, tintRGB[0], tintRGB[1], tintRGB[2], tw); gl.uniform1f(uL.uBoost, boost); gl.uniform1i(uL.uFirst, i0); gl.bindVertexArray(vaoL);
       const n = (i1 - i0 + 1) * 2;
       gl.uniform1f(uL.uPass, 2); gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, n, 1);
       gl.uniform1f(uL.uPass, 1); gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, n, GLOW);
@@ -379,7 +394,7 @@ void main(){ float r2=dot(vUv,vUv); vec3 col=vCol; float a;
       // ease the particle boost toward the switch state
       const want = root.dataset.behind === 'on' ? 1 : 0;
       boost += (want - boost) * (1 - Math.exp(-dt / Math.max(0.05, WV.boost.easeSeconds)));
-      gl.useProgram(PS); set(uS); gl.uniform1f(uS.uN, pts.length); gl.uniform1f(uS.uKnotI, pinch); gl.uniform1f(uS.uBoost, boost); gl.bindVertexArray(vaoS);
+      gl.useProgram(PS); set(uS); if (TINT) gl.uniform4f(uS.uTint, tintRGB[0], tintRGB[1], tintRGB[2], tw); gl.uniform1f(uS.uN, pts.length); gl.uniform1f(uS.uKnotI, pinch); gl.uniform1f(uS.uBoost, boost); gl.bindVertexArray(vaoS);
       gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, nSpr);
       gl.bindVertexArray(null);
     }

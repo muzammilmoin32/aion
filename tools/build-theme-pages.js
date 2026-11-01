@@ -152,6 +152,92 @@ function dropPanelCss(html) {
   return html.slice(0, st.a) + `<style>${tree.toString()}</style>` + html.slice(st.b);
 }
 const theme = dropPanelCss(rd('reference/aion-v2.html'));
+/* Section 06 ("Pick a journey. Watch it run."): the same sample clips as the main page's phone
+   (assets/video/<id>-720.mp4, Saudi and Gulf people on their phones), one per journey. The steps, progress,
+   live trace and caption follow the video's own time, like app.js does on the main page. Runs inside the
+   theme's script, so J and reduce are in scope; text it writes is translated by theme-v2-i18n.js. */
+const PLAYER6 = `/* ---- section 06 player: the main page's sample videos (built by tools/build-theme-pages.js) ---- */
+  const ORDER = [0,1,2,4,5,3];
+  const VID = ['sme','payroll','sadad','cards','lending','ews'];   // J[i] → its clip, same files as the main page
+  const FOCUS = { sme:'50% 30%', payroll:'30% 50%', sadad:'50% 40%', cards:'50% 40%', lending:'50% 40%', ews:'28% 40%' };   // keep the person in the portrait crop
+  const VDIR = (document.body.dataset.base || '') + 'assets/video/';
+  const jlist = document.getElementById('jlist'), screen = document.getElementById('screen'), prog = document.getElementById('prog'), ltrace = document.getElementById('ltrace'), kpiText = document.getElementById('kpiText'), pauseBtn = document.getElementById('pauseBtn'), demoEl = document.getElementById('demo');
+  ORDER.forEach(ji => { const j = J[ji]; const b = document.createElement('button'); b.className='jitem'; b.setAttribute('role','tab'); b.dataset.j = ji; b.innerHTML = \`<span class="jt">\${j.tag}<span class="wave">\${j.wave}</span></span><b>\${j.name}</b><span class="d">\${j.d}</span>\`; b.addEventListener('click', () => selectJourney(ji)); jlist.appendChild(b); });
+  screen.classList.add('has-vid');
+  screen.innerHTML = '<video class="scr-vid" muted playsinline loop preload="metadata" aria-hidden="true"></video><span class="scr-tag">Sample video</span><div class="scr-ov"><div class="scr-top">Aion Reference Bank <span class="scr-n"></span></div><div class="scr-bar"><i></i></div></div><div class="scr-capw" aria-live="off"><span class="k"></span><div class="cap"></div></div>';
+  const vid = screen.querySelector('video'), nEl = screen.querySelector('.scr-n'), barEl = screen.querySelector('.scr-bar i'), kEl = screen.querySelector('.scr-capw .k'), capEl = screen.querySelector('.cap');
+  // reduced motion: starts still on one step with the button on Play; pressing Play is the visitor's choice and plays it
+  let cj = 0, si = 0, paused = reduce, played = false, visible = false, near = false, DUR = 2600;
+  pauseBtn.type = 'button';
+  // the current pip resumes where the video is within this step (negative delay), not from empty
+  function pips(){
+    const into = vid.duration > 0 ? Math.max(0, Math.min(DUR, vid.currentTime * 1000 - si * DUR)) | 0 : 0;
+    prog.innerHTML = J[cj].steps.map((_,n)=>\`<i class="\${n<si?'done':n===si?'now':''}" style="--dur:\${Math.round(DUR)}ms;--into:-\${n===si ? into : 0}ms"></i>\`).join('');
+  }
+  function render(){
+    const j = J[cj], s = j.steps[si];
+    nEl.textContent = \`\${si+1}/6\`; barEl.style.width = \`\${(si+1)/6*100}%\`;
+    kEl.textContent = s[0]; capEl.textContent = \`\${s[3]}.\`;
+    pips();
+    ltrace.innerHTML = j.steps.map((st,n)=>\`<div class="trace-row \${n<si?'done':n===si?'run':''}"><span><i></i>\${String(n+1).padStart(2,'0')} \${st[4]}</span><span class="ms">\${n<si ? st[5] : n===si ? 'running' : 'queued'}</span></div>\`).join('');
+    kpiText.textContent = j.kpi;
+    [...jlist.children].forEach(b => b.setAttribute('aria-selected', String(+b.dataset.j === cj)));
+  }
+  // the pip only fills while the clip is really moving (not off screen, loading, stalled or paused)
+  const live = () => demoEl.classList.toggle('paused', paused || vid.paused || vid.readyState < 3);
+  ['play','playing','pause','waiting','stalled','seeking','canplay','emptied'].forEach(e => vid.addEventListener(e, live));
+  function setPaused(v){
+    paused = v;
+    pauseBtn.querySelector('span').textContent = v ? 'Play' : 'Pause';
+    pauseBtn.querySelector('use').setAttribute('href', v ? '#i-play' : '#i-pause');
+    live();
+  }
+  const play = () => {
+    if (paused || !visible || !vid.getAttribute('src')) { vid.pause(); return; }
+    vid.play().catch((e) => { if (e && e.name === 'NotAllowedError') setPaused(true); });   // autoplay blocked: hand the visitor a Play button
+  };
+  // six equal steps across the clip: the step shown is wherever the video is
+  function sync(){
+    const d = vid.duration; if (!(d > 0) || !Number.isFinite(d)) return;
+    DUR = d * 1000 / 6;
+    if (reduce && !played) return;   // reduced motion, not started yet: keep the still step
+    const n = Math.min(5, Math.floor(vid.currentTime / d * 6));
+    if (n !== si) { si = n; render(); }
+  }
+  vid.addEventListener('timeupdate', sync);
+  // the clip's real length and position re-time the pip; the step text only changes with the step
+  vid.addEventListener('playing', () => { played = true; sync(); pips(); });
+  vid.addEventListener('loadedmetadata', () => { sync(); pips(); });
+  // the clip is only fetched once the section is near
+  function setVideo(){
+    if (!near) return;
+    const id = VID[cj];
+    vid.poster = VDIR + id + '-poster.jpg'; vid.style.objectPosition = FOCUS[id];
+    vid.src = VDIR + id + '-720.mp4'; play();
+  }
+  window.selectJourney = i => { cj = i; si = reduce && !played ? 3 : 0; render(); setVideo(); };
+  pauseBtn.addEventListener('click', () => { setPaused(!paused); play(); });
+  new IntersectionObserver((es) => { if (es[es.length - 1].isIntersecting && !near) { near = true; setVideo(); } }, { rootMargin: '600px 0px' }).observe(screen);
+  // only plays while the phone is on screen
+  new IntersectionObserver((es) => { visible = es[es.length - 1].isIntersecting; play(); live(); }).observe(screen);
+  setPaused(paused);
+  selectJourney(0);`;
+const PLAYER6_CSS = `<style>
+/* section 06: the phone plays a sample clip; step counter on top, the step's caption at the bottom */
+#screen.has-vid { position: relative; padding: 0; background: #050d0c; color: #fff; }
+#screen .scr-vid { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }
+#screen .scr-tag { position: absolute; z-index: 2; top: 56px; inset-inline-end: 14px; padding: 3px 8px; border-radius: 999px; font-size: 10px; font-weight: 700; color: #fff; background: rgb(0 0 0 / .45); backdrop-filter: blur(4px); }
+#screen .scr-ov { position: absolute; z-index: 1; inset: 0 0 auto; padding: 24px 18px 34px; border-radius: inherit; background: linear-gradient(rgb(0 0 0 / .6), transparent); }
+#screen .scr-ov .scr-top span { color: rgb(255 255 255 / .75); }
+#screen .scr-ov .scr-bar { margin: 10px 0 0; background: rgb(255 255 255 / .28); }
+#screen .scr-capw { position: absolute; z-index: 1; inset: auto 12px 14px; display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
+#screen .scr-capw .k { font-family: var(--font-mono); font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; color: #8ff3e8; background: rgb(0 0 0 / .5); padding: 3px 8px; border-radius: 999px; }
+#screen .scr-capw .cap { margin: 0; align-self: stretch; background: rgb(7 32 29 / .86); }
+/* the current pip resumes mid-step; in Arabic it fills from the right */
+#demos .prog i.now::after { animation-delay: var(--into, 0ms); }
+:root[dir="rtl"] #demos .prog i.now::after { transform-origin: right; }
+</style>`;
+
 function page(withLines) {
   let h = theme;
   h = must(h, '<html lang="en">', '<html lang="en" dir="ltr" data-behind="off">', 'html tag');
@@ -169,6 +255,12 @@ function page(withLines) {
   if (t2) h = h.slice(0, t2.a) + '/* ---- tilt panel player: replaced by the glass section ---- */' + h.slice(t2.b);
   // the particle layer behind the panel follows our stage
   h = must(h, "anchor:'#g3d'", "anchor:'#tilt .g3d'", 'slab particle anchor');
+  // Ai966 (the "neural" scene): the particle shape turns purple there; on landing-f the lines follow (AION_STREAM_ONLY.tint)
+  h = must(h, "const SCENE_COLORS = { terrain: { glow: { gold:'#ffd27a' } } };", "const SCENE_COLORS = { terrain: { glow: { gold:'#ffd27a' } }, neural: { glow: { deep:'#3d1f7a', base:'#b48cff', cyan:'#efe6ff', gold:'#d2b6ff' }, ink: { deep:'#d3c2f5', base:'#5a2ab3', cyan:'#7b4fd9', gold:'#6638c2' } } };", 'particle colours: Ai966 purple');
+  // section 06: the phone plays the main page's sample videos instead of drawn wireframe screens
+  const p6 = cut(h, '/* ---- wireframe player (section 06) ---- */', 'if (reduce) si = 3; render(); schedule();', 'theme section 06 player');
+  if (p6) h = h.slice(0, p6.a) + PLAYER6 + h.slice(p6.b);
+  h = must(h, '</head>', `${PLAYER6_CSS}\n</head>`, 'head end (section 06 video)');
 
   /* --- checked against the script (Aion Website The Script.docx) --- */
   // navigation: five top-level items (Solutions, Intelligence, Open Banking, Platform, Company); the theme had no Platform
@@ -197,7 +289,7 @@ function page(withLines) {
 </head>`, 'head end (rtl)');
   const lines = withLines ? `
 <!-- the main page's light stream: only a few fibres, from section 02 down, drawn as you scroll -->
-<script>window.AION_STREAM_ONLY = { from: '#tilt', end: '#book' };</script>
+<script>window.AION_STREAM_ONLY = { from: '#tilt', end: '#book', tint: { section: '#ai966', color: [168, 110, 255] } };</script>
 <script src="waves-settings.js" defer></script>
 <script src="../theme-dark.js" defer></script>` : '';
   h = must(h, '</body>', `

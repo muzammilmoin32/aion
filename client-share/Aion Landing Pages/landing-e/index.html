@@ -513,6 +513,21 @@ html.cursor-on:not(:where(#tilt *)), html.cursor-on *:not(:where(#tilt *)){curso
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="../glass-section.css">
 <style>
+/* section 06: the phone plays a sample clip; step counter on top, the step's caption at the bottom */
+#screen.has-vid { position: relative; padding: 0; background: #050d0c; color: #fff; }
+#screen .scr-vid { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }
+#screen .scr-tag { position: absolute; z-index: 2; top: 56px; inset-inline-end: 14px; padding: 3px 8px; border-radius: 999px; font-size: 10px; font-weight: 700; color: #fff; background: rgb(0 0 0 / .45); backdrop-filter: blur(4px); }
+#screen .scr-ov { position: absolute; z-index: 1; inset: 0 0 auto; padding: 24px 18px 34px; border-radius: inherit; background: linear-gradient(rgb(0 0 0 / .6), transparent); }
+#screen .scr-ov .scr-top span { color: rgb(255 255 255 / .75); }
+#screen .scr-ov .scr-bar { margin: 10px 0 0; background: rgb(255 255 255 / .28); }
+#screen .scr-capw { position: absolute; z-index: 1; inset: auto 12px 14px; display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
+#screen .scr-capw .k { font-family: var(--font-mono); font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; color: #8ff3e8; background: rgb(0 0 0 / .5); padding: 3px 8px; border-radius: 999px; }
+#screen .scr-capw .cap { margin: 0; align-self: stretch; background: rgb(7 32 29 / .86); }
+/* the current pip resumes mid-step; in Arabic it fills from the right */
+#demos .prog i.now::after { animation-delay: var(--into, 0ms); }
+:root[dir="rtl"] #demos .prog i.now::after { transform-origin: right; }
+</style>
+<style>
 /* Arabic: right to left in the theme's Arabic font */
 :root[dir="rtl"] { --font-body: var(--font-ar); --font-display: var(--font-ar); --font-mono: var(--font-ar); }
 /* letter spacing pulls Arabic letters apart: none anywhere in Arabic */
@@ -978,7 +993,7 @@ html.cursor-on:not(:where(#tilt *)), html.cursor-on *:not(:where(#tilt *)){curso
 
 /* Per-scene colour overrides, filled in later. Keys: glow (on teal/dark) or ink (on light).
    Example: neural: { ink:{ base:'#2346a8' }, glow:{ base:'#8fb4ff' } } */
-const SCENE_COLORS = { terrain: { glow: { gold:'#ffd27a' } } };   /* the hero keeps its warm yellow dots */
+const SCENE_COLORS = { terrain: { glow: { gold:'#ffd27a' } }, neural: { glow: { deep:'#3d1f7a', base:'#b48cff', cyan:'#efe6ff', gold:'#d2b6ff' }, ink: { deep:'#d3c2f5', base:'#5a2ab3', cyan:'#7b4fd9', gold:'#6638c2' } } };   /* the hero keeps its warm yellow dots */
 
 const PALETTES = {
   glow: { deep:'#0d6a63', base:'#5cf3da', cyan:'#dcfff9', gold:'#9ff7ea' },   // additive, on teal or dark
@@ -1792,23 +1807,72 @@ const PALETTES = {
 
   /* ---- tilt panel player: replaced by the glass section ---- */
 
-  /* ---- wireframe player (section 06) ---- */
+  /* ---- section 06 player: the main page's sample videos (built by tools/build-theme-pages.js) ---- */
   const ORDER = [0,1,2,4,5,3];
+  const VID = ['sme','payroll','sadad','cards','lending','ews'];   // J[i] → its clip, same files as the main page
+  const FOCUS = { sme:'50% 30%', payroll:'30% 50%', sadad:'50% 40%', cards:'50% 40%', lending:'50% 40%', ews:'28% 40%' };   // keep the person in the portrait crop
+  const VDIR = (document.body.dataset.base || '') + 'assets/video/';
   const jlist = document.getElementById('jlist'), screen = document.getElementById('screen'), prog = document.getElementById('prog'), ltrace = document.getElementById('ltrace'), kpiText = document.getElementById('kpiText'), pauseBtn = document.getElementById('pauseBtn'), demoEl = document.getElementById('demo');
   ORDER.forEach(ji => { const j = J[ji]; const b = document.createElement('button'); b.className='jitem'; b.setAttribute('role','tab'); b.dataset.j = ji; b.innerHTML = `<span class="jt">${j.tag}<span class="wave">${j.wave}</span></span><b>${j.name}</b><span class="d">${j.d}</span>`; b.addEventListener('click', () => selectJourney(ji)); jlist.appendChild(b); });
-  let cj = 0, si = 0, timer = null, paused = false; const DUR = 2600;
+  screen.classList.add('has-vid');
+  screen.innerHTML = '<video class="scr-vid" muted playsinline loop preload="metadata" aria-hidden="true"></video><span class="scr-tag">Sample video</span><div class="scr-ov"><div class="scr-top">Aion Reference Bank <span class="scr-n"></span></div><div class="scr-bar"><i></i></div></div><div class="scr-capw" aria-live="off"><span class="k"></span><div class="cap"></div></div>';
+  const vid = screen.querySelector('video'), nEl = screen.querySelector('.scr-n'), barEl = screen.querySelector('.scr-bar i'), kEl = screen.querySelector('.scr-capw .k'), capEl = screen.querySelector('.cap');
+  // reduced motion: starts still on one step with the button on Play; pressing Play is the visitor's choice and plays it
+  let cj = 0, si = 0, paused = reduce, played = false, visible = false, near = false, DUR = 2600;
+  pauseBtn.type = 'button';
+  // the current pip resumes where the video is within this step (negative delay), not from empty
+  function pips(){
+    const into = vid.duration > 0 ? Math.max(0, Math.min(DUR, vid.currentTime * 1000 - si * DUR)) | 0 : 0;
+    prog.innerHTML = J[cj].steps.map((_,n)=>`<i class="${n<si?'done':n===si?'now':''}" style="--dur:${Math.round(DUR)}ms;--into:-${n===si ? into : 0}ms"></i>`).join('');
+  }
   function render(){
     const j = J[cj], s = j.steps[si];
-    screen.innerHTML = `<div class="scr-top">Aion Reference Bank <span>${si+1}/6</span></div><div class="scr-bar"><i style="width:${(si+1)/6*100}%"></i></div><div class="scr-body swap"><span class="k">${s[0]}</span><h4>${s[1]}</h4>${s[2].map(f=>`<div class="fld">${f[0]}<b>${f[1]}</b></div>`).join('')}<div class="scr-cta">${si===5?'Done':'Continue'}</div><div class="cap">${s[3]}.</div></div>`;
-    prog.innerHTML = j.steps.map((_,n)=>`<i class="${n<si?'done':n===si?'now':''}" style="--dur:${DUR}ms"></i>`).join('');
+    nEl.textContent = `${si+1}/6`; barEl.style.width = `${(si+1)/6*100}%`;
+    kEl.textContent = s[0]; capEl.textContent = `${s[3]}.`;
+    pips();
     ltrace.innerHTML = j.steps.map((st,n)=>`<div class="trace-row ${n<si?'done':n===si?'run':''}"><span><i></i>${String(n+1).padStart(2,'0')} ${st[4]}</span><span class="ms">${n<si ? st[5] : n===si ? 'running' : 'queued'}</span></div>`).join('');
     kpiText.textContent = j.kpi;
     [...jlist.children].forEach(b => b.setAttribute('aria-selected', String(+b.dataset.j === cj)));
   }
-  function schedule(){ clearTimeout(timer); if (paused || reduce) return; timer = setTimeout(() => { si = (si+1)%6; render(); schedule(); }, DUR); }
-  window.selectJourney = i => { cj = i; si = 0; render(); schedule(); };
-  pauseBtn.addEventListener('click', () => { paused = !paused; demoEl.classList.toggle('paused', paused); pauseBtn.querySelector('span').textContent = paused ? 'Play' : 'Pause'; pauseBtn.querySelector('use').setAttribute('href', paused ? '#i-play' : '#i-pause'); if (!paused){ si=(si+1)%6; render(); } schedule(); });
-  if (reduce) si = 3; render(); schedule();
+  // the pip only fills while the clip is really moving (not off screen, loading, stalled or paused)
+  const live = () => demoEl.classList.toggle('paused', paused || vid.paused || vid.readyState < 3);
+  ['play','playing','pause','waiting','stalled','seeking','canplay','emptied'].forEach(e => vid.addEventListener(e, live));
+  function setPaused(v){
+    paused = v;
+    pauseBtn.querySelector('span').textContent = v ? 'Play' : 'Pause';
+    pauseBtn.querySelector('use').setAttribute('href', v ? '#i-play' : '#i-pause');
+    live();
+  }
+  const play = () => {
+    if (paused || !visible || !vid.getAttribute('src')) { vid.pause(); return; }
+    vid.play().catch((e) => { if (e && e.name === 'NotAllowedError') setPaused(true); });   // autoplay blocked: hand the visitor a Play button
+  };
+  // six equal steps across the clip: the step shown is wherever the video is
+  function sync(){
+    const d = vid.duration; if (!(d > 0) || !Number.isFinite(d)) return;
+    DUR = d * 1000 / 6;
+    if (reduce && !played) return;   // reduced motion, not started yet: keep the still step
+    const n = Math.min(5, Math.floor(vid.currentTime / d * 6));
+    if (n !== si) { si = n; render(); }
+  }
+  vid.addEventListener('timeupdate', sync);
+  // the clip's real length and position re-time the pip; the step text only changes with the step
+  vid.addEventListener('playing', () => { played = true; sync(); pips(); });
+  vid.addEventListener('loadedmetadata', () => { sync(); pips(); });
+  // the clip is only fetched once the section is near
+  function setVideo(){
+    if (!near) return;
+    const id = VID[cj];
+    vid.poster = VDIR + id + '-poster.jpg'; vid.style.objectPosition = FOCUS[id];
+    vid.src = VDIR + id + '-720.mp4'; play();
+  }
+  window.selectJourney = i => { cj = i; si = reduce && !played ? 3 : 0; render(); setVideo(); };
+  pauseBtn.addEventListener('click', () => { setPaused(!paused); play(); });
+  new IntersectionObserver((es) => { if (es[es.length - 1].isIntersecting && !near) { near = true; setVideo(); } }, { rootMargin: '600px 0px' }).observe(screen);
+  // only plays while the phone is on screen
+  new IntersectionObserver((es) => { visible = es[es.length - 1].isIntersecting; play(); live(); }).observe(screen);
+  setPaused(paused);
+  selectJourney(0);
 
   /* ---- cursor: the Aion mark, white on dark surfaces, teal on light ---- */
   if (matchMedia('(hover:hover) and (pointer:fine)').matches && !reduce){

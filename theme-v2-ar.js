@@ -139,7 +139,7 @@ window.THEME_V2_AR = {
   'SME card and spend': 'بطاقات المنشآت والإنفاق',
   'Cards for five staff, limits by category, synced to the ERP.': 'بطاقات لخمسة موظفين، بحدود حسب الفئة، ومتزامنة مع نظام تخطيط الموارد.',
   'Aion Reference Bank': 'بنك Aion المرجعي',
-  'Pause': 'إيقاف مؤقت', 'Play': 'تشغيل',
+  'Pause': 'إيقاف مؤقت', 'Play': 'تشغيل', 'Sample video': 'فيديو نموذجي',
   'What is behind it · live trace': 'ما خلفها · تتبع مباشر',
   'running': 'قيد التشغيل', 'queued': 'في الانتظار',
   'BOARD KPI': 'مؤشر مجلس الإدارة',
