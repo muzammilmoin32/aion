@@ -20,7 +20,7 @@ async function shot(p, sel, hide) {
   if (!box || box.width < 10 || box.height < 10) return null;
   // show only that canvas: hide page content and the other canvas so only its pixels count
   await p.evaluate((h) => { const st = document.createElement('style'); st.id = 'only'; st.textContent = h; document.head.appendChild(st); }, hide);
-  const buf = await p.screenshot({ clip: box });
+  const buf = await p.screenshot();   // the canvases fill the viewport; a clip can scroll the page back to the top
   await p.evaluate(() => document.getElementById('only').remove());
   return p.evaluate(async (b64) => {
     const img = new Image(); img.src = 'data:image/png;base64,' + b64; await img.decode();
@@ -49,7 +49,9 @@ const teal = (c) => c && c.n > 20 && c.g > c.r && !(c.r > c.g && c.b > c.g);
     const p1 = await P(); const s1 = await S();
     await go('ai966');
     ok(await p.evaluate(() => document.body.dataset.scene === 'neural'), `${dir}: Ai966 is the active scene`);
-    const p2 = await P(); const s2 = await S();
+    // software rendering runs the theme's 1 s colour blend over many seconds: poll until purple (up to ~30 s)
+    let p2, s2;
+    for (let i = 0; i < 8; i += 1) { p2 = await P(); s2 = await S(); if (purple(p2) && (!sc || purple(s2))) break; await p.waitForTimeout(4000); }
     await p.screenshot({ path: path.join(__dirname, 'screenshots', `${dir}-ai966-purple.png`) });
     ok(!purple(p1) && purple(p2), `${dir}: particles teal before (${JSON.stringify(p1)}) → purple at Ai966 (${JSON.stringify(p2)})`);
     if (dir === 'landing-f') ok(sc && teal(s1) && purple(s2), `landing-f: lines teal before (${JSON.stringify(s1)}) → purple at Ai966 (${JSON.stringify(s2)})`);

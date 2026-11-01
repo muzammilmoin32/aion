@@ -19,7 +19,7 @@ function helpers() {
   const ATTRS = ['aria-label', 'placeholder', 'title', 'alt', 'data-caption', 'data-scene-name'];
   const ALLOW = [
     /[A-Za-z][\w-]*(?:\.[A-Za-z_][\w-]*)+(?:\/[\w\-./]*)?/g,                       // code identifiers / domains: nafath.authenticate, aiondigital.com/about-us
-    /\b(?:Ai966|Rubix|Aion|AION|aion|FCA|IBAN|SAR|CR|GOSI|ERP|AML|WPS|SADAD)\b/g,     // names and acronyms ("aion" = footer logo wordmark)
+    /\b(?:Ai966|Rubix|Aion|AION|aion|Spire|FCA|IBAN|SAR|CR|GOSI|ERP|AML|WPS|SADAD)\b/g,     // names and acronyms ("aion" = footer logo wordmark)
     /\+966 5X XXX XXXX/g, /\b\d+X+\b/g,                                              // masked placeholders (+966 5X XXX XXXX, CR 10XXXXXXXX)
   ];
   const textNodes = () => {

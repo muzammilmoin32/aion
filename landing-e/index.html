@@ -528,6 +528,34 @@ html.cursor-on:not(:where(#tilt *)), html.cursor-on *:not(:where(#tilt *)){curso
 :root[dir="rtl"] #demos .prog i.now::after { transform-origin: right; }
 </style>
 <style>
+/* open banking section */
+/* the Spire logo is white with cyan bars: it sits on its own dark tile, in light and dark mode */
+.ob-logo { display: block; width: fit-content; margin: 0 0 22px; padding: 14px 20px; border-radius: 16px; background: #07121a; box-shadow: 0 14px 30px -18px rgb(4 30 60 / .6), inset 0 0 0 1px rgb(80 200 255 / .14); }
+.ob-logo img { display: block; width: auto; height: 52px; }   /* the logo carries its own "for open banking" line */
+#open-banking .ob-p { margin: 0 0 6px; color: var(--ink-2); line-height: 1.6; }
+#open-banking .stats { margin: 22px 0 4px; }
+.ob-points { list-style: none; margin: 18px 0 26px; padding: 0; display: grid; gap: 10px; }
+.ob-points li { display: flex; gap: 12px; align-items: center; font-size: 15px; color: var(--ink-2); }
+.ob-points li::before { content: ""; flex: none; width: 8px; height: 8px; border-radius: 50%; background: #2f7cf0; box-shadow: 0 0 0 4px rgb(47 124 240 / .16); }
+/* the cursor follows the section colour: purple at Ai966, blue at Open Banking (teal elsewhere) */
+/* every state lists the same filter functions, so colour changes fade instead of snapping */
+#cursor .ct { filter: hue-rotate(0deg) brightness(1) saturate(1) drop-shadow(0 1px 2px rgba(0,30,28,.35)); }
+#cursor .ct, #cursor .cw { transition: opacity .25s, filter .6s; }
+body[data-scene="neural"] #cursor .ct { filter: hue-rotate(82deg) brightness(1) saturate(1.15) drop-shadow(0 1px 2px rgba(0,30,28,.35)); }
+body[data-scene="openbank"] #cursor .ct { filter: hue-rotate(40deg) brightness(1) saturate(1.35) drop-shadow(0 1px 2px rgba(0,30,28,.35)); }
+body[data-scene="neural"] #cursor::after { border-color: #7b4fd9; }
+body[data-scene="openbank"] #cursor::after { border-color: #2f7cf0; }
+/* on dark surfaces: the coloured mark, lighter, instead of the white one */
+html.c-ondark body:is([data-scene="neural"], [data-scene="openbank"]) #cursor .ct { opacity: 1; }
+html.c-ondark body:is([data-scene="neural"], [data-scene="openbank"]) #cursor .cw { opacity: 0; }
+html.c-ondark body[data-scene="neural"] #cursor .ct { filter: hue-rotate(82deg) brightness(1.7) saturate(1.1) drop-shadow(0 1px 2px rgba(0,30,28,.35)); }
+html.c-ondark body[data-scene="openbank"] #cursor .ct { filter: hue-rotate(40deg) brightness(1.6) saturate(1.2) drop-shadow(0 1px 2px rgba(0,30,28,.35)); }
+/* the new-tab arrow points the reading way */
+:root[dir="rtl"] .ob-arrow { display: inline-block; transform: scaleX(-1); }
+html.c-ondark body[data-scene="neural"] #cursor::after { border-color: #c9adff; }
+html.c-ondark body[data-scene="openbank"] #cursor::after { border-color: #9cc4ff; }
+</style>
+<style>
 /* Arabic: right to left in the theme's Arabic font */
 :root[dir="rtl"] { --font-body: var(--font-ar); --font-display: var(--font-ar); --font-mono: var(--font-ar); }
 /* letter spacing pulls Arabic letters apart: none anywhere in Arabic */
@@ -576,7 +604,7 @@ html.cursor-on:not(:where(#tilt *)), html.cursor-on *:not(:where(#tilt *)){curso
       <div class="nav-links">
         <button id="solBtn" aria-expanded="false" aria-controls="mega">Solutions <svg><use href="#i-chev"/></svg></button>
         <a href="#ai966">Intelligence (Ai966)</a>
-        <a href="#fits">Open Banking</a>
+        <a href="#open-banking">Open Banking</a>
         <a href="#fits">Platform</a>
         <a href="#proof">Company</a>
       </div>
@@ -624,7 +652,7 @@ html.cursor-on:not(:where(#tilt *)), html.cursor-on *:not(:where(#tilt *)){curso
         <div class="mega-col mm-mobile">
           <span class="eyebrow">More</span>
           <a class="mm-item" href="#ai966"><span><b>Intelligence (Ai966)</b></span></a>
-          <a class="mm-item" href="#fits"><span><b>Open Banking</b></span></a>
+          <a class="mm-item" href="#open-banking"><span><b>Open Banking</b></span></a>
           <a class="mm-item" href="#fits"><span><b>Platform</b></span></a>
           <a class="mm-item" href="#proof"><span><b>Company</b></span></a>
           <div class="seg" role="group" aria-label="Lens" style="align-self:flex-start">
@@ -914,6 +942,30 @@ html.cursor-on:not(:where(#tilt *)), html.cursor-on *:not(:where(#tilt *)){curso
   </div>
 </section>
 
+<!-- 07b OPEN BANKING · Spire (from aiondigital.com/open-banking) · card left, the API exchange shape right -->
+<section data-scene="openbank" data-scene-name="Open banking network" id="open-banking">
+  <div class="wrap split">
+    <article class="card reveal">
+      <div class="ob-logo"><img src="../assets/spire-logo.png" alt="Spire for open banking" width="400" height="158"></div>
+      <span class="eyebrow">Open Banking · Spire</span>
+      <h2 class="h2">One API to the banks your customers already use.</h2>
+      <p class="lede">Spire Technologies is an investment of Aion Digital, building an API financial ecosystem in the MENA region and preparing banks for the next big challenge: open banking.</p>
+      <p class="ob-p">Our technology, AI and banking experts make it happen through connected open banking API platforms, knowledge sharing and global expert collaborations.</p>
+      <div class="stats">
+        <div class="stat"><b data-count="5000" data-suffix="+">5,000+</b><span>banks and data providers connected</span></div>
+        <div class="stat"><b data-count="52" data-suffix="+">52+</b><span>countries</span></div>
+      </div>
+      <ul class="ob-points">
+        <li>Connect to regional and global banks</li>
+        <li>Financial management made simple</li>
+        <li>Secure, consented data sharing</li>
+      </ul>
+      <a class="btn btn-primary" href="https://spiretech.co/" target="_blank" rel="noopener">Visit Spire <span class="ob-arrow" aria-hidden="true">↗</span><span class="sr-only"> (opens in a new tab)</span></a>
+    </article>
+    <div class="slot-col" aria-hidden="true"><div class="slot" id="slotOpen" data-caption="5,000+ banks · 52+ countries · one API"></div></div>
+  </div>
+</section>
+
 <!-- 08 PROOF · shape left, card right -->
 <section data-scene="trophy" data-scene-name="Award medal" id="proof">
   <div class="wrap split rev">
@@ -973,7 +1025,7 @@ html.cursor-on:not(:where(#tilt *)), html.cursor-on *:not(:where(#tilt *)){curso
       <p>Riyadh · Manama · Karachi</p>
       <small>Licensed for open banking by SAMA, CBB and FCA</small>
     </div>
-    <nav aria-label="Footer"><a href="#what">Solutions</a><a href="#fits">Platform</a><a href="#ai966">Intelligence</a><a href="#fits">Open Banking</a><a href="#proof">Company</a><a href="#proof">Careers</a><a href="#book">Contact</a></nav>
+    <nav aria-label="Footer"><a href="#what">Solutions</a><a href="#fits">Platform</a><a href="#ai966">Intelligence</a><a href="#open-banking">Open Banking</a><a href="#proof">Company</a><a href="#proof">Careers</a><a href="#book">Contact</a></nav>
   </div>
 </footer>
 
@@ -993,7 +1045,7 @@ html.cursor-on:not(:where(#tilt *)), html.cursor-on *:not(:where(#tilt *)){curso
 
 /* Per-scene colour overrides, filled in later. Keys: glow (on teal/dark) or ink (on light).
    Example: neural: { ink:{ base:'#2346a8' }, glow:{ base:'#8fb4ff' } } */
-const SCENE_COLORS = { terrain: { glow: { gold:'#ffd27a' } }, neural: { glow: { deep:'#3d1f7a', base:'#b48cff', cyan:'#efe6ff', gold:'#d2b6ff' }, ink: { deep:'#d3c2f5', base:'#5a2ab3', cyan:'#7b4fd9', gold:'#6638c2' } } };   /* the hero keeps its warm yellow dots */
+const SCENE_COLORS = { terrain: { glow: { gold:'#ffd27a' } }, openbank: { glow: { deep:'#123a8a', base:'#6fa8ff', cyan:'#e6f0ff', gold:'#a8c8ff' }, ink: { deep:'#c4d7f7', base:'#1d5bd0', cyan:'#2f7cf0', gold:'#2556b8' } }, neural: { glow: { deep:'#3d1f7a', base:'#b48cff', cyan:'#efe6ff', gold:'#d2b6ff' }, ink: { deep:'#d3c2f5', base:'#5a2ab3', cyan:'#7b4fd9', gold:'#6638c2' } } };   /* the hero keeps its warm yellow dots */
 
 const PALETTES = {
   glow: { deep:'#0d6a63', base:'#5cf3da', cyan:'#dcfff9', gold:'#9ff7ea' },   // additive, on teal or dark
@@ -1408,6 +1460,21 @@ const PALETTES = {
 
   /* ---------- scene registry ---------- */
   const deg = Math.PI/180;
+/* ---------- 07b · open banking: one API, thousands of banks (added by tools/build-theme-pages.js) ---------- */
+  function buildOpen(){
+    const s = Shape(8080), NB = 18, banks = [];
+    for (let i=0;i<NB;i++){ const y = 1-(i+.5)/NB*2, r = Math.sqrt(1-y*y), th = i*2.39996323; banks.push([Math.cos(th)*r*21, y*17, Math.sin(th)*r*21]); }
+    const ball = (n, c, r, size, bright, anim) => { for (let q=0;q<n;q++){ const y=1-(q+.5)/n*2, rr=Math.sqrt(1-y*y), th=q*2.39996323, k=Math.cbrt(R()); s.put(c[0]+Math.cos(th)*rr*r*k, c[1]+y*r*k, c[2]+Math.sin(th)*rr*r*k, size*rand(.85,1.15), bright*rand(.75,1), 0, anim); } };
+    s.put(0, 0, 0, 22, 1, 1, 0);                                     // the hub's bright core
+    ball(Math.floor(N*.06), [0,0,0], 4.4, 1.3, 1, 3);                // the hub: one API (breathes)
+    ringXZ(s, Math.floor(N*.03), 0, 0, 0, 7, .8, 1.1);               // its halo
+    banks.forEach((b,i) => { ball(Math.floor(N*.007), b, 1.3, 1.1, .95, 3); if (i%4===0) s.put(b[0], b[1], b[2], 9, 1, 1, 0); });   // banks and data providers
+    banks.forEach(b => s.line(Math.floor(N*.006), b, [0,0,0], .05, .8, .3, 0));                                                   // the spokes
+    banks.forEach(b => { for (let q=0;q<Math.floor(N*.006);q++) s.put(b[0]+gauss()*.15, b[1]+gauss()*.15, b[2]+gauss()*.15, rand(1.1,1.6), 1, 0, q%2 ? 1 : 2); });   // packets: 1 to the hub, 2 back out
+    ringXZ(s, Math.floor(N*.04), 0, 0, 0, 27, .35, .9);              // the orbit
+    dust(s, 32, 26, 32);
+    return s;
+  }
   const SCENES = {
     terrain: { mode:1, build:buildTerrain, pitch:-0.085 },
     slab:    { mode:7, build:buildStage,    anchor:'#tilt .g3d',      size:34, cover:1.05, z:-2, oy:.46, rot:t => [0.3, 0.1*Math.sin(t*.3), 0] },
@@ -1416,6 +1483,7 @@ const PALETTES = {
     globe:   { mode:0, build:buildBars,     anchor:'#slotNums', size:20, cover:.92, z:-4, rot:t => [0.22, -0.5 + 0.18*Math.sin(t*.4), 0] },
     steps:   { mode:0, build:buildPhone,    anchor:'#slotDemos', size:14, cover:.95, z:-4, rot:t => [0.06, -0.3 + 0.22*Math.sin(t*.45), 0] },
     neural:  { mode:6, build:buildRadar,    anchor:'#slotAi',   size:26, cover:.95, z:-4, rot:t => [-0.75, 0.15*Math.sin(t*.35), 0] },
+    openbank:{ mode:8, build:buildOpen,     anchor:'#slotOpen', size:30, cover:.95, z:-4, rot:t => [0.32, t*0.16, 0] },
     trophy:  { mode:0, build:buildMedal,    anchor:'#slotProof', size:17, cover:.85, z:-4, rot:t => [0.04, 0.45*Math.sin(t*.55), 0] },
     calendar:{ mode:0, build:buildCalendar, anchor:'#calSlot',  size:20, cover:.95, z:-4,  rot:t => [-0.35, 0.3 + 0.15*Math.sin(t*.45), 0] },
     logo:    { mode:0, build:buildLogo,     anchor:'#markSlot', size:24, cover:.9, z:-4,  rot:t => [0.05*Math.sin(t*.4), 0.5*Math.sin(t*0.5), 0] }
@@ -1507,6 +1575,10 @@ const PALETTES = {
         if (d.w > 0.5 && d.w < 1.5){ float r = length(p.xz*vec2(1.0, 1.75)); b *= 0.35 + 1.1*pow(0.5 + 0.5*sin(r*0.32 - uTime*2.2), 5.0); }
         else if (d.w > 1.5){ b *= 0.3 + 1.3*pow(0.5 + 0.5*sin(p.y*0.7 - uTime*4.0 + aRnd.y), 6.0); }
         return vec4(p,b);
+      }
+      if (mode > 7.5 && mode < 8.5 && d.w > 0.5){
+        if (d.w < 2.5){ float t = fract(uTime*(0.12 + aRnd.y*0.1) + aRnd.z*7.0); p *= d.w < 1.5 ? 1.0 - t : t; b *= smoothstep(0.0, 0.08, t)*(1.0 - smoothstep(0.9, 1.0, t))*1.8; return vec4(p,b); }
+        b *= 0.5 + 1.0*pow(0.5 + 0.5*sin(uTime*2.2 - length(p)*0.35 + 1.6), 4.0); return vec4(p,b);   // +1.6: the hub is lit on the still (reduced-motion) frame
       }
       if (mode > 5.5 && mode < 6.5 && abs(d.w) > 0.001){
         float a = uTime*d.w; float c = cos(a), s = sin(a); p.xy = vec2(c*p.x - s*p.y, s*p.x + c*p.y); return vec4(p,b);
@@ -1669,7 +1741,7 @@ const PALETTES = {
   else requestAnimationFrame(loop);
   window.addEventListener('aion:theme', () => { if (reduce) draw(0); });
   /* warm up the other shapes after first paint so switches never stall */
-  const order = ['slab','nodes','layers','globe','steps','neural','trophy','calendar','logo'];
+  const order = ['slab','nodes','layers','globe','steps','neural','openbank','trophy','calendar','logo'];
   let wi = 0; (function warm(){ if (wi >= order.length) return; shape(order[wi++]); setTimeout(warm, 80); })();
 })();
 </script>
@@ -1751,7 +1823,7 @@ const PALETTES = {
   activate(sections[0]); tilt();
 
   /* reveal + counters */
-  function countUp(el){ const to = +el.dataset.count, suf = el.dataset.suffix || '', t0 = performance.now(); (function f(now){ const p = Math.min(1,(now-t0)/1300), e = 1-Math.pow(1-p,3); el.textContent = Math.round(to*e) + suf; if (p<1) requestAnimationFrame(f); })(t0); }
+  function countUp(el){ const to = +el.dataset.count, suf = el.dataset.suffix || '', t0 = performance.now(); (function f(now){ const p = Math.min(1,(now-t0)/1300), e = 1-Math.pow(1-p,3); el.textContent = Math.round(to*e).toLocaleString('en-US') + suf; if (p<1) requestAnimationFrame(f); })(t0); }
   const io = new IntersectionObserver(es => es.forEach(en => { if (!en.isIntersecting) return; en.target.classList.add('in'); if (!reduce) en.target.querySelectorAll('[data-count]').forEach(countUp); io.unobserve(en.target); }), {threshold:.25});
   document.querySelectorAll('.reveal, #stats').forEach(el => io.observe(el));
 

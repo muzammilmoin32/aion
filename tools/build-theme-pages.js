@@ -238,6 +238,102 @@ const PLAYER6_CSS = `<style>
 :root[dir="rtl"] #demos .prog i.now::after { transform-origin: right; }
 </style>`;
 
+/* Open Banking, inspired by aiondigital.com/open-banking: Spire, Aion Digital's open banking company, with its
+   "Visit site" button to spiretech.co. In place of that page's photo, the particle field draws the "API exchange":
+   one hub (the API) inside an orbiting globe of bank nodes, with data packets travelling both ways along the spokes.
+   The shape, the light lines (landing-f) and the cursor turn blue here, as Ai966 turns them purple. */
+const OB_SECTION = `
+
+<!-- 07b OPEN BANKING · Spire (from aiondigital.com/open-banking) · card left, the API exchange shape right -->
+<section data-scene="openbank" data-scene-name="Open banking network" id="open-banking">
+  <div class="wrap split">
+    <article class="card reveal">
+      <div class="ob-logo"><img src="../assets/spire-logo.png" alt="Spire for open banking" width="400" height="158"></div>
+      <span class="eyebrow">Open Banking · Spire</span>
+      <h2 class="h2">One API to the banks your customers already use.</h2>
+      <p class="lede">Spire Technologies is an investment of Aion Digital, building an API financial ecosystem in the MENA region and preparing banks for the next big challenge: open banking.</p>
+      <p class="ob-p">Our technology, AI and banking experts make it happen through connected open banking API platforms, knowledge sharing and global expert collaborations.</p>
+      <div class="stats">
+        <div class="stat"><b data-count="5000" data-suffix="+">5,000+</b><span>banks and data providers connected</span></div>
+        <div class="stat"><b data-count="52" data-suffix="+">52+</b><span>countries</span></div>
+      </div>
+      <ul class="ob-points">
+        <li>Connect to regional and global banks</li>
+        <li>Financial management made simple</li>
+        <li>Secure, consented data sharing</li>
+      </ul>
+      <a class="btn btn-primary" href="https://spiretech.co/" target="_blank" rel="noopener">Visit Spire <span class="ob-arrow" aria-hidden="true">↗</span><span class="sr-only"> (opens in a new tab)</span></a>
+    </article>
+    <div class="slot-col" aria-hidden="true"><div class="slot" id="slotOpen" data-caption="5,000+ banks · 52+ countries · one API"></div></div>
+  </div>
+</section>`;
+// the shape, built from the theme's own helpers (Shape, ringXZ, dust, R, rand, gauss, N)
+const OB_BUILD = `/* ---------- 07b · open banking: one API, thousands of banks (added by tools/build-theme-pages.js) ---------- */
+  function buildOpen(){
+    const s = Shape(8080), NB = 18, banks = [];
+    for (let i=0;i<NB;i++){ const y = 1-(i+.5)/NB*2, r = Math.sqrt(1-y*y), th = i*2.39996323; banks.push([Math.cos(th)*r*21, y*17, Math.sin(th)*r*21]); }
+    const ball = (n, c, r, size, bright, anim) => { for (let q=0;q<n;q++){ const y=1-(q+.5)/n*2, rr=Math.sqrt(1-y*y), th=q*2.39996323, k=Math.cbrt(R()); s.put(c[0]+Math.cos(th)*rr*r*k, c[1]+y*r*k, c[2]+Math.sin(th)*rr*r*k, size*rand(.85,1.15), bright*rand(.75,1), 0, anim); } };
+    s.put(0, 0, 0, 22, 1, 1, 0);                                     // the hub's bright core
+    ball(Math.floor(N*.06), [0,0,0], 4.4, 1.3, 1, 3);                // the hub: one API (breathes)
+    ringXZ(s, Math.floor(N*.03), 0, 0, 0, 7, .8, 1.1);               // its halo
+    banks.forEach((b,i) => { ball(Math.floor(N*.007), b, 1.3, 1.1, .95, 3); if (i%4===0) s.put(b[0], b[1], b[2], 9, 1, 1, 0); });   // banks and data providers
+    banks.forEach(b => s.line(Math.floor(N*.006), b, [0,0,0], .05, .8, .3, 0));                                                   // the spokes
+    banks.forEach(b => { for (let q=0;q<Math.floor(N*.006);q++) s.put(b[0]+gauss()*.15, b[1]+gauss()*.15, b[2]+gauss()*.15, rand(1.1,1.6), 1, 0, q%2 ? 1 : 2); });   // packets: 1 to the hub, 2 back out
+    ringXZ(s, Math.floor(N*.04), 0, 0, 0, 27, .35, .9);              // the orbit
+    dust(s, 32, 26, 32);
+    return s;
+  }
+  `;
+// shader mode 8: packets travel along their spoke (in to the hub or back out); the hub and banks pulse outward
+const OB_MODE = `if (mode > 7.5 && mode < 8.5 && d.w > 0.5){
+        if (d.w < 2.5){ float t = fract(uTime*(0.12 + aRnd.y*0.1) + aRnd.z*7.0); p *= d.w < 1.5 ? 1.0 - t : t; b *= smoothstep(0.0, 0.08, t)*(1.0 - smoothstep(0.9, 1.0, t))*1.8; return vec4(p,b); }
+        b *= 0.5 + 1.0*pow(0.5 + 0.5*sin(uTime*2.2 - length(p)*0.35 + 1.6), 4.0); return vec4(p,b);   // +1.6: the hub is lit on the still (reduced-motion) frame
+      }
+      `;
+const OB_CSS = `<style>
+/* open banking section */
+/* the Spire logo is white with cyan bars: it sits on its own dark tile, in light and dark mode */
+.ob-logo { display: block; width: fit-content; margin: 0 0 22px; padding: 14px 20px; border-radius: 16px; background: #07121a; box-shadow: 0 14px 30px -18px rgb(4 30 60 / .6), inset 0 0 0 1px rgb(80 200 255 / .14); }
+.ob-logo img { display: block; width: auto; height: 52px; }   /* the logo carries its own "for open banking" line */
+#open-banking .ob-p { margin: 0 0 6px; color: var(--ink-2); line-height: 1.6; }
+#open-banking .stats { margin: 22px 0 4px; }
+.ob-points { list-style: none; margin: 18px 0 26px; padding: 0; display: grid; gap: 10px; }
+.ob-points li { display: flex; gap: 12px; align-items: center; font-size: 15px; color: var(--ink-2); }
+.ob-points li::before { content: ""; flex: none; width: 8px; height: 8px; border-radius: 50%; background: #2f7cf0; box-shadow: 0 0 0 4px rgb(47 124 240 / .16); }
+/* the cursor follows the section colour: purple at Ai966, blue at Open Banking (teal elsewhere) */
+/* every state lists the same filter functions, so colour changes fade instead of snapping */
+#cursor .ct { filter: hue-rotate(0deg) brightness(1) saturate(1) drop-shadow(0 1px 2px rgba(0,30,28,.35)); }
+#cursor .ct, #cursor .cw { transition: opacity .25s, filter .6s; }
+body[data-scene="neural"] #cursor .ct { filter: hue-rotate(82deg) brightness(1) saturate(1.15) drop-shadow(0 1px 2px rgba(0,30,28,.35)); }
+body[data-scene="openbank"] #cursor .ct { filter: hue-rotate(40deg) brightness(1) saturate(1.35) drop-shadow(0 1px 2px rgba(0,30,28,.35)); }
+body[data-scene="neural"] #cursor::after { border-color: #7b4fd9; }
+body[data-scene="openbank"] #cursor::after { border-color: #2f7cf0; }
+/* on dark surfaces: the coloured mark, lighter, instead of the white one */
+html.c-ondark body:is([data-scene="neural"], [data-scene="openbank"]) #cursor .ct { opacity: 1; }
+html.c-ondark body:is([data-scene="neural"], [data-scene="openbank"]) #cursor .cw { opacity: 0; }
+html.c-ondark body[data-scene="neural"] #cursor .ct { filter: hue-rotate(82deg) brightness(1.7) saturate(1.1) drop-shadow(0 1px 2px rgba(0,30,28,.35)); }
+html.c-ondark body[data-scene="openbank"] #cursor .ct { filter: hue-rotate(40deg) brightness(1.6) saturate(1.2) drop-shadow(0 1px 2px rgba(0,30,28,.35)); }
+/* the new-tab arrow points the reading way */
+:root[dir="rtl"] .ob-arrow { display: inline-block; transform: scaleX(-1); }
+html.c-ondark body[data-scene="neural"] #cursor::after { border-color: #c9adff; }
+html.c-ondark body[data-scene="openbank"] #cursor::after { border-color: #9cc4ff; }
+</style>`;
+function openBanking(h) {
+  const ai = cut(h, '<section data-scene="neural"', '</section>', 'Ai966 section (open banking goes after it)');
+  if (ai) h = h.slice(0, ai.b) + OB_SECTION + h.slice(ai.b);
+  h = must(h, '  const SCENES = {', OB_BUILD + 'const SCENES = {', 'scene registry (open banking shape)');
+  h = must(h, "    neural:  { mode:6, build:buildRadar,    anchor:'#slotAi',   size:26, cover:.95, z:-4, rot:t => [-0.75, 0.15*Math.sin(t*.35), 0] },",
+    "    neural:  { mode:6, build:buildRadar,    anchor:'#slotAi',   size:26, cover:.95, z:-4, rot:t => [-0.75, 0.15*Math.sin(t*.35), 0] },\n    openbank:{ mode:8, build:buildOpen,     anchor:'#slotOpen', size:30, cover:.95, z:-4, rot:t => [0.32, t*0.16, 0] },", 'scene: openbank');
+  h = must(h, 'if (mode > 5.5 && mode < 6.5 && abs(d.w) > 0.001){', OB_MODE + 'if (mode > 5.5 && mode < 6.5 && abs(d.w) > 0.001){', 'shader mode 8');
+  h = must(h, "const order = ['slab','nodes','layers','globe','steps','neural','trophy',", "const order = ['slab','nodes','layers','globe','steps','neural','openbank','trophy',", 'warm-up order');
+  // blue particles there (dark: glow, light: ink)
+  h = must(h, ', neural: { glow:', ", openbank: { glow: { deep:'#123a8a', base:'#6fa8ff', cyan:'#e6f0ff', gold:'#a8c8ff' }, ink: { deep:'#c4d7f7', base:'#1d5bd0', cyan:'#2f7cf0', gold:'#2556b8' } }, neural: { glow:", 'particle colours: open banking blue');
+  // counters: 5,000+ keeps its thousands separator while counting
+  h = must(h, 'el.textContent = Math.round(to*e) + suf;', "el.textContent = Math.round(to*e).toLocaleString('en-US') + suf;", 'counter separator');
+  h = must(h, '</head>', `${OB_CSS}\n</head>`, 'head end (open banking)');
+  return h;
+}
+
 function page(withLines) {
   let h = theme;
   h = must(h, '<html lang="en">', '<html lang="en" dir="ltr" data-behind="off">', 'html tag');
@@ -261,11 +357,14 @@ function page(withLines) {
   const p6 = cut(h, '/* ---- wireframe player (section 06) ---- */', 'if (reduce) si = 3; render(); schedule();', 'theme section 06 player');
   if (p6) h = h.slice(0, p6.a) + PLAYER6 + h.slice(p6.b);
   h = must(h, '</head>', `${PLAYER6_CSS}\n</head>`, 'head end (section 06 video)');
+  h = openBanking(h);
 
   /* --- checked against the script (Aion Website The Script.docx) --- */
   // navigation: five top-level items (Solutions, Intelligence, Open Banking, Platform, Company); the theme had no Platform
-  h = must(h, '<a href="#fits">Open Banking</a>\n        <a href="#proof">Company</a>', '<a href="#fits">Open Banking</a>\n        <a href="#fits">Platform</a>\n        <a href="#proof">Company</a>', 'nav: Platform link');
-  h = must(h, '<a class="mm-item" href="#fits"><span><b>Open Banking</b></span></a>', '<a class="mm-item" href="#fits"><span><b>Open Banking</b></span></a>\n          <a class="mm-item" href="#fits"><span><b>Platform</b></span></a>', 'mobile menu: Platform link');
+  // Open Banking goes to its own section (desktop, mobile menu, footer)
+  h = must(h, '<a href="#fits">Open Banking</a>\n        <a href="#proof">Company</a>', '<a href="#open-banking">Open Banking</a>\n        <a href="#fits">Platform</a>\n        <a href="#proof">Company</a>', 'nav: Platform link');
+  h = must(h, '<a class="mm-item" href="#fits"><span><b>Open Banking</b></span></a>', '<a class="mm-item" href="#open-banking"><span><b>Open Banking</b></span></a>\n          <a class="mm-item" href="#fits"><span><b>Platform</b></span></a>', 'mobile menu: Platform link');
+  h = must(h, '<a href="#ai966">Intelligence</a><a href="#fits">Open Banking</a>', '<a href="#ai966">Intelligence</a><a href="#open-banking">Open Banking</a>', 'footer: Open Banking link');
   // Scroll 3: the script's four numbers (9 years, 800+ APIs, 3 licences, an SME bank live in about 6 months)
   h = must(h, '<div class="num"><strong data-count="150" data-suffix="+">150+</strong><p>bankers, regulators, technologists and designers</p><small>Source · aiondigital.com/about-us</small></div>',
     '<div class="num"><strong data-count="9">9</strong><p>years in Saudi and GCC banking</p><small>Source · aiondigital.com/about-us</small></div>', 'numbers: 9 years');
@@ -289,7 +388,7 @@ function page(withLines) {
 </head>`, 'head end (rtl)');
   const lines = withLines ? `
 <!-- the main page's light stream: only a few fibres, from section 02 down, drawn as you scroll -->
-<script>window.AION_STREAM_ONLY = { from: '#tilt', end: '#book', tint: { section: '#ai966', color: [168, 110, 255] } };</script>
+<script>window.AION_STREAM_ONLY = { from: '#tilt', end: '#book', tint: [{ section: '#ai966', color: [168, 110, 255] }, { section: '#open-banking', color: [60, 140, 255] }] };</script>
 <script src="waves-settings.js" defer></script>
 <script src="../theme-dark.js" defer></script>` : '';
   h = must(h, '</body>', `

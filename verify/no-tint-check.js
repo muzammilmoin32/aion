@@ -11,7 +11,7 @@ async function shot(p, sel, hide) {
   const box = await p.evaluate((s) => { const e = document.querySelector(s); if (!e) return null; const r = e.getBoundingClientRect(); return { x: Math.max(0, r.x), y: Math.max(0, r.y), width: Math.min(innerWidth, r.right) - Math.max(0, r.x), height: Math.min(innerHeight, r.bottom) - Math.max(0, r.y) }; }, sel);
   if (!box || box.width < 10 || box.height < 10) return null;
   await p.evaluate((h) => { const st = document.createElement('style'); st.id = 'only'; st.textContent = h; document.head.appendChild(st); }, hide);
-  const buf = await p.screenshot({ clip: box });
+  const buf = await p.screenshot();   // the canvases fill the viewport; a clip can scroll the page back to the top
   await p.evaluate(() => document.getElementById('only').remove());
   return p.evaluate(async (b64) => {
     const img = new Image(); img.src = 'data:image/png;base64,' + b64; await img.decode();
