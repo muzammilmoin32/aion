@@ -322,6 +322,8 @@ window.THEME_V2_AR = {
   'Wave terrain': 'تضاريس الموجة',
   'Live demo': 'عرض مباشر',
   // wireframe v2: hero, demos, proof
+  '[Client logo · written OK]': '[شعار عميل · بموافقة كتابية]',
+  'Licensed by SAMA, CBB and FCA [wording to be checked by compliance]': 'مرخصة من ساما ومصرف البحرين المركزي وFCA [الصياغة تراجعها إدارة الالتزام]',
   'Running inside a Top 5 Saudi bank': 'يعمل داخل أحد أكبر خمسة بنوك سعودية',
   'Launch digital banking on the core you already have.': 'أطلق خدماتك المصرفية الرقمية على النظام الأساسي الذي تملكه اليوم.',
   "Aion is the layer between a bank's core and its customers: ready journeys, 800+ banking APIs, open banking and AI. Built for Saudi Arabia and the GCC since 2017.": 'Aion هي الطبقة بين النظام الأساسي للبنك وعملائه: رحلات جاهزة، وأكثر من 800 واجهة برمجة مصرفية، والمصرفية المفتوحة، والذكاء الاصطناعي. مصممة للسعودية ودول الخليج منذ 2017.',

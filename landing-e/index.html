@@ -562,10 +562,15 @@ html.c-ondark body[data-scene="openbank"] #cursor::after { border-color: #9cc4ff
 .hero-ctas { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-top: clamp(24px, 4vh, 40px); }
 .hero-ctas .hero-cta { margin-top: 0; }
 .hero-cta.ghost { gap: 10px; background: rgb(255 255 255 / .08); color: #fff; border: 1px solid rgb(255 255 255 / .45); text-decoration: none; box-shadow: none; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
-.hero-cta.ghost span { font-size: 12px; }
-:root[dir="rtl"] .hero-cta.ghost span { display: inline-block; transform: scaleX(-1); }
+.hero-cta.ghost span { font-size: 12px; }   /* a play glyph: not mirrored in Arabic */
+button.hero-cta { border: 0; cursor: pointer; }
 .hero-micro { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 22px; margin: 22px 0 0; font-family: var(--font-mono); font-size: 12px; color: rgb(255 255 255 / .88); text-shadow: 0 1px 10px rgb(0 40 38 / .75), 0 0 2px rgb(0 40 38 / .6); }
 .hero-micro a { flex-basis: 100%; color: #fff; text-decoration: underline; text-underline-offset: 4px; }
+</style>
+<style>
+/* smooth scroll: panels do not hand their scroll on to the page; the scrollbar's space stays when the page is held */
+.mega-card, .lay-menu { overscroll-behavior: contain; }
+html.lenis { scrollbar-gutter: stable; }
 </style>
 <style>
 /* Arabic: right to left in the theme's Arabic font */
@@ -626,11 +631,11 @@ html.c-ondark body[data-scene="openbank"] #cursor::after { border-color: #9cc4ff
         </div>
         <button class="icon-btn lang" id="langBtn" aria-label="Switch to Arabic">عربي</button>
         <button class="icon-btn" id="themeBtn" aria-label="Switch between light and dark"><svg class="ico-moon"><use href="#i-moon"/></svg><svg class="ico-sun"><use href="#i-sun"/></svg></button>
-        <a class="btn btn-primary" href="#book">Book a walkthrough</a>
+        <button type="button" class="btn btn-primary" data-open-booking>Book a walkthrough</button>
         <button class="icon-btn burger" id="burger" aria-label="Open menu" aria-expanded="false" aria-controls="mega"><svg><use href="#i-menu"/></svg></button>
       </div>
     </nav>
-    <div class="mega" id="mega" data-lenis-prevent hidden>
+    <div class="mega" id="mega" hidden>
       <div class="mega-card">
         <div class="mega-col">
           <span class="eyebrow">By customer</span>
@@ -688,10 +693,10 @@ html.c-ondark body[data-scene="openbank"] #cursor::after { border-color: #9cc4ff
     <h1>Launch digital banking on the core you already have.</h1>
     <p class="hero-sub">Aion is the layer between a bank's core and its customers: ready journeys, 800+ banking APIs, open banking and AI. Built for Saudi Arabia and the GCC since 2017.</p>
     <div class="hero-ctas">
-      <a class="hero-cta" href="#book">Book a 20-minute walkthrough</a>
+      <button type="button" class="hero-cta" data-open-booking>Book a 20-minute walkthrough</button>
       <a class="hero-cta ghost" href="#demos"><span aria-hidden="true">▶</span> Watch a journey run</a>
     </div>
-    <p class="hero-micro"><span>Open banking licences · SAMA · CBB · FCA</span><span>Onboarding in under 5 minutes</span><a href="#book">or message us on WhatsApp</a></p>
+    <p class="hero-micro"><span>Open banking licences · SAMA · CBB · FCA</span><span>Onboarding in under 5 minutes</span><a href="https://wa.me/000000000000" target="_blank" rel="noopener">or message us on WhatsApp</a></p>
   </div>
   <div class="scroll-cue" aria-hidden="true">SCROLL<i></i></div>
 </section>
@@ -833,7 +838,7 @@ html.c-ondark body[data-scene="openbank"] #cursor::after { border-color: #9cc4ff
 <div class="logos" id="logos">
   <div class="wrap">
     <span class="eyebrow">Trusted across the GCC</span>
-    <div class="logo-track"><div class="logo-row"><div class="logo-ph">Sahra Bank</div><div class="logo-ph">Rimal Digital</div><div class="logo-ph">Waha Finance</div><div class="logo-ph">Dhow Pay</div><div class="logo-ph">Liwan Capital</div><div class="logo-ph">Qarya Bank</div><div class="logo-ph">Sahra Bank</div><div class="logo-ph">Rimal Digital</div><div class="logo-ph">Waha Finance</div><div class="logo-ph">Dhow Pay</div><div class="logo-ph">Liwan Capital</div><div class="logo-ph">Qarya Bank</div></div></div>
+    <div class="logo-track"><div class="logo-row"><div class="logo-ph">[Client logo · written OK]</div><div class="logo-ph">[Client logo · written OK]</div><div class="logo-ph">[Client logo · written OK]</div><div class="logo-ph">[Client logo · written OK]</div><div class="logo-ph">[Client logo · written OK]</div><div class="logo-ph">[Client logo · written OK]</div><div class="logo-ph">[Client logo · written OK]</div><div class="logo-ph">[Client logo · written OK]</div><div class="logo-ph">[Client logo · written OK]</div><div class="logo-ph">[Client logo · written OK]</div><div class="logo-ph">[Client logo · written OK]</div><div class="logo-ph">[Client logo · written OK]</div></div></div>
   </div>
 </div>
 
@@ -1018,8 +1023,8 @@ html.c-ondark body[data-scene="openbank"] #cursor::after { border-color: #9cc4ff
       <h2>See it on your own journeys in 20 minutes.</h2>
       <p>Two fields and a calendar slot. We bring the reference bank; you bring the journey you want to fix first.</p>
       <div class="ctas">
-        <a class="btn btn-primary" href="#book"><svg><use href="#i-cal"/></svg>Book a 20-minute walkthrough</a>
-        <a class="btn btn-ghost" href="#book"><svg><use href="#i-chat"/></svg>Message us on WhatsApp</a>
+        <button type="button" class="btn btn-primary" data-open-booking><svg><use href="#i-cal"/></svg>Book a 20-minute walkthrough</button>
+        <a class="btn btn-ghost" href="https://wa.me/000000000000" target="_blank" rel="noopener"><svg><use href="#i-chat"/></svg>Message us on WhatsApp</a>
       </div>
     </article>
     <div class="slot-col" aria-hidden="true"><div class="slot" id="markSlot" data-caption="From Saudi Arabia to the world"></div></div>
@@ -1032,7 +1037,7 @@ html.c-ondark body[data-scene="openbank"] #cursor::after { border-color: #9cc4ff
     <div>
       <a class="logo" href="#top"><img class="lt" alt="" src="data:image/png;base64,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">aion</a>
       <p>Manama · Riyadh · Kuwait City · Dubai · Karachi</p>
-      <small>Licensed for open banking by SAMA, CBB and FCA</small>
+      <small>Licensed by SAMA, CBB and FCA [wording to be checked by compliance]</small>
     </div>
     <nav aria-label="Footer"><a href="#what">Solutions</a><a href="#fits">Platform</a><a href="#ai966">Intelligence</a><a href="#open-banking">Open Banking</a><a href="#proof">Company</a><a href="#proof">Careers</a><a href="#book">Contact</a></nav>
   </div>
@@ -1773,7 +1778,7 @@ const PALETTES = {
   /* smooth scroll */
   let lenis = null;
   if (window.Lenis && !reduce && document.compatMode === 'CSS1Compat'){
-    lenis = new Lenis({ duration:1.15, easing:t => Math.min(1, 1.001 - Math.pow(2, -10*t)), smoothWheel:true, wheelMultiplier:.95, touchMultiplier:1.4 });
+    lenis = new Lenis({ prevent: n => !!(n.matches && n.matches('.mega-card, .lay-menu') && n.scrollHeight > n.clientHeight + 1), duration:1.15, easing:t => Math.min(1, 1.001 - Math.pow(2, -10*t)), smoothWheel:true, wheelMultiplier:.95, touchMultiplier:1.4 });
     (function raf(time){ lenis.raf(time); requestAnimationFrame(raf); })(performance.now());
     if (root.classList.contains('intro')) lenis.stop();
     window.__aionLenis = lenis;
@@ -1801,10 +1806,11 @@ const PALETTES = {
   /* mega menu */
   const mega = document.getElementById('mega'), solBtn = document.getElementById('solBtn'), burger = document.getElementById('burger');
   const setMega = open => { mega.hidden = !open; solBtn.setAttribute('aria-expanded', String(open)); burger.setAttribute('aria-expanded', String(open)); };
-  solBtn.addEventListener('click', e => { e.stopPropagation(); setMega(mega.hidden); });
+  let hoverOpenedAt = 0;
+  solBtn.addEventListener('click', e => { e.stopPropagation(); if (performance.now() - hoverOpenedAt < 700) { setMega(true); return; } setMega(mega.hidden); });
   burger.addEventListener('click', e => { e.stopPropagation(); setMega(mega.hidden); });
   let hoverT; const canHover = matchMedia('(hover:hover)').matches;
-  solBtn.addEventListener('mouseenter', () => { if (canHover){ clearTimeout(hoverT); setMega(true); } });
+  solBtn.addEventListener('mouseenter', () => { if (canHover){ clearTimeout(hoverT); if (mega.hidden) hoverOpenedAt = performance.now(); setMega(true); } });
   [solBtn, mega].forEach(el => el.addEventListener('mouseleave', () => { if (canHover) hoverT = setTimeout(() => setMega(false), 220); }));
   mega.addEventListener('mouseenter', () => clearTimeout(hoverT));
   document.addEventListener('click', e => { if (!mega.hidden && !mega.contains(e.target)) setMega(false); });
@@ -1992,32 +1998,37 @@ const PALETTES = {
 <script>
 /* smooth scroll: hold the page behind full-screen layers; keyboard keys glide (built by tools/build-theme-pages.js) */
 (() => {
-  const L = () => window.__aionLenis;
-  if (!L()) return;   // reduced motion or no Lenis: the browser's own scrolling
-  const burger = document.getElementById('burger'), mega = document.getElementById('mega');
+  const lenis = window.__aionLenis;
+  if (!lenis) return;   // reduced motion or no Lenis: the browser's own scrolling
+  const root = document.documentElement, burger = document.getElementById('burger'), mega = document.getElementById('mega');
   const held = new Set();
+  // the theme restarts Lenis when its intro ends: never while something holds the page
+  const start = lenis.start.bind(lenis);
+  lenis.start = () => { if (!held.size) start(); };
   const hold = (why, on) => {
-    const lenis = L(); if (!lenis) return;
     if (on) held.add(why); else held.delete(why);
     if (held.size) lenis.stop();
-    else if (!document.documentElement.classList.contains('intro')) lenis.start();
+    else if (!root.classList.contains('intro')) start();
   };
-  const fullMenu = () => mega && !mega.hidden && burger && getComputedStyle(burger).display !== 'none';   // phone menu covers the page
-  if (mega) new MutationObserver(() => hold('menu', fullMenu())).observe(mega, { attributes: true, attributeFilter: ['hidden'] });
+  const fullMenu = () => !!(mega && !mega.hidden && burger && getComputedStyle(burger).display !== 'none');   // the phone menu covers the page
+  const checkMenu = () => hold('menu', fullMenu());
+  if (mega) new MutationObserver(checkMenu).observe(mega, { attributes: true, attributeFilter: ['hidden'] });
+  addEventListener('resize', checkMenu);   // rotating or resizing across the phone breakpoint with the menu open
   document.querySelectorAll('dialog').forEach((d) => new MutationObserver(() => hold('dialog:' + d.id, d.open)).observe(d, { attributes: true, attributeFilter: ['open'] }));
 
-  const SKIP = 'input, textarea, select, [contenteditable=""], [contenteditable="true"], [role="tablist"], [role="listbox"], [role="menu"], [role="slider"], .chips, .lay, #mega';
+  const SKIP = 'input, textarea, select, [contenteditable=""], [contenteditable="true"], [role="tablist"], [role="listbox"], [role="menu"], [role="slider"], [role="switch"], .chips, .lay, #mega';
   addEventListener('keydown', (e) => {
-    const lenis = L();
-    if (!lenis || lenis.isStopped || e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey) return;
+    if (lenis.isStopped || e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey) return;
     const t = e.target;
     if (t && t.closest && t.closest(SKIP)) return;                                                   // keys that belong to a control
-    if (e.key === ' ' && t && t.closest && t.closest('button, a, summary, [role="button"]')) return;  // Space presses the button
+    if (e.key === ' ' && t && t.closest && t.closest('button, summary, [role="button"]')) return;      // Space presses the button
     const step = innerHeight - 110;   // a screen, less the header and a little overlap
+    const line = e.repeat ? 70 : 140;  // a held arrow: about 2000 px/s, steady
+    // targetScroll is where the current glide is heading, so quick presses add up
     let to;
     switch (e.key) {
-      case 'ArrowDown': to = lenis.targetScroll + 140; break;
-      case 'ArrowUp': to = lenis.targetScroll - 140; break;
+      case 'ArrowDown': to = lenis.targetScroll + line; break;
+      case 'ArrowUp': to = lenis.targetScroll - line; break;
       case 'PageDown': to = lenis.targetScroll + step; break;
       case 'PageUp': to = lenis.targetScroll - step; break;
       case ' ': to = lenis.targetScroll + (e.shiftKey ? -step : step); break;
@@ -2027,7 +2038,7 @@ const PALETTES = {
     }
     if (e.shiftKey && e.key !== ' ') return;
     e.preventDefault();
-    lenis.scrollTo(Math.max(0, Math.min(lenis.limit, to)), { duration: e.repeat ? 0.3 : 0.9 });   // held key: short glides that keep up
+    lenis.scrollTo(Math.max(0, Math.min(lenis.limit, to)), { duration: e.repeat ? 0.3 : 0.9, programmatic: false });
   });
 })();
 </script>

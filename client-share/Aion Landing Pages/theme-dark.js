@@ -228,16 +228,24 @@ void main(){ float r2=dot(vUv,vUv); vec3 col=vCol; float a;
     names.forEach((n) => { uL[n] = gl.getUniformLocation(PL, n); uS[n] = gl.getUniformLocation(PS, n); });
     const tex = gl.createTexture(); const vaoL = gl.createVertexArray(); const vaoS = gl.createVertexArray(); const bufL = gl.createBuffer(); const bufS = gl.createBuffer();
     let boost = 0;
-    // AION_STREAM_ONLY.tint = { section: '#id', color: [r, g, b] }: the lines take that colour while the section is the
-    // page's active scene (body[data-scene], as the theme sets it) or, without scenes, while it holds the middle of the screen
-    const TINT = ONLY && ONLY.tint && ONLY.tint.section && Array.isArray(ONLY.tint.color) && ONLY.tint.color.length >= 3 ? ONLY.tint : null;
-    const tintRGB = TINT ? (() => { const c = TINT.color.map((x) => clamp(Number(x) / 255 || 0)); const mx = Math.max(...c), mn = Math.min(...c); return c.map((x) => (mx > mn ? (x - mn) / (mx - mn) : 1)); })() : [0, 0, 0];
-    let tintK = 0; let tintEl = null;
-    const tintOn = () => {
-      if (!tintEl || !tintEl.isConnected) tintEl = document.querySelector(TINT.section);
-      const el = tintEl; if (!el) return false;
-      if (el.dataset.scene && document.body.dataset.scene) return document.body.dataset.scene === el.dataset.scene;
-      const r = el.getBoundingClientRect(); return r.top < innerHeight * 0.5 && r.bottom > innerHeight * 0.5;
+    // AION_STREAM_ONLY.tint = { section: '#id', color: [r, g, b] } (or a list of them): the lines take that colour while the
+    // section is the page's active scene (body[data-scene], as the theme sets it) or, without scenes, while it holds the
+    // middle of the screen. Only the colour's hue is used: the lines keep their own brightness and white cores.
+    const hueOf = (col) => { const c = col.map((x) => clamp(Number(x) / 255 || 0)); const mx = Math.max(...c), mn = Math.min(...c); return c.map((x) => (mx > mn ? (x - mn) / (mx - mn) : 1)); };
+    const TINTS = (ONLY && ONLY.tint ? [].concat(ONLY.tint) : [])
+      .filter((t) => t && t.section && Array.isArray(t.color) && t.color.length >= 3)
+      .map((t) => ({ section: t.section, rgb: hueOf(t.color), el: null }));
+    const TINT = TINTS.length ? TINTS : null;
+    const tintRGB = [0, 0, 0];   // the colour on screen: eases from one section's colour to the next
+    let tintK = 0;
+    const tintNow = () => {
+      for (const t of TINTS) {
+        if (!t.el || !t.el.isConnected) t.el = document.querySelector(t.section);
+        const el = t.el; if (!el) continue;
+        if (el.dataset.scene && document.body.dataset.scene) { if (document.body.dataset.scene === el.dataset.scene) return t; continue; }
+        const r = el.getBoundingClientRect(); if (r.top < innerHeight * 0.5 && r.bottom > innerHeight * 0.5) return t;
+      }
+      return null;
     };
     let zones = [];
     let W; let H; let dpr; let pts = []; let pinch = 0; let head = 0; let built = false; let fogA = 0; let fogB = 0; let nStr = 0; let nSpr = 0; let started = false; let startT = 0; let maxS = 0; let mergeFrom = 1e9; let startY = -1e9;
@@ -384,7 +392,16 @@ void main(){ float r2=dot(vUv,vUv); vec3 col=vCol; float a;
       gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE);
       gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, tex);
       const set = (u) => { gl.uniform1i(u.uPath, 0); gl.uniform2f(u.uRes, W, H); gl.uniform1f(u.uScroll, sy); gl.uniform1f(u.uTime, t); gl.uniform1f(u.uHead, head); gl.uniform1f(u.uFogA, fogA); gl.uniform1f(u.uFogB, fogB); gl.uniform1i(u.uZN, zones.length); if (u.uMergeFrom) gl.uniform1f(u.uMergeFrom, mergeFrom); gl.uniform1f(u.uStart, startY); if (zones.length) gl.uniform2fv(u.uZ, new Float32Array(zones.flat().concat(new Array(16 - zones.length * 2).fill(-1e6)))); };
-      if (TINT) tintK += ((tintOn() ? 1 : 0) - tintK) * (reduce ? 1 : 1 - Math.exp(-dt * 4));   // about a second, like the particles' colour blend
+      if (TINT) {   // about a second, like the particles' colour blend
+        const on = tintNow(); const e = reduce ? 1 : 1 - Math.exp(-dt * 4);
+        tintK += ((on ? 1 : 0) - tintK) * e;
+        if (on) {
+          for (let i = 0; i < 3; i += 1) tintRGB[i] = tintK < 0.02 ? on.rgb[i] : tintRGB[i] + (on.rgb[i] - tintRGB[i]) * e;   // from teal: straight to it; between sections: blend
+          // keep it a pure hue (lowest channel 0, highest 1) so a purple → blue blend never washes out
+          const mx = Math.max(...tintRGB), mn = Math.min(...tintRGB);
+          if (mx - mn > 1e-3) for (let i = 0; i < 3; i += 1) tintRGB[i] = (tintRGB[i] - mn) / (mx - mn);
+        }
+      }
       const tw = TINT && tintK > 0.002 ? tintK : 0;   // uniforms start at 0 (off): the main pages never set it
       gl.useProgram(PL); set(uL); if (TINT) gl.uniform4f(uL.uTint, tintRGB[0], tintRGB[1], tintRGB[2], tw); gl.uniform1f(uL.uBoost, boost); gl.uniform1i(uL.uFirst, i0); gl.bindVertexArray(vaoL);
       const n = (i1 - i0 + 1) * 2;

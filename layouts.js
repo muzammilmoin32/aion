@@ -66,7 +66,7 @@ body:has(.nav-panel.is-open) .lay { visibility: hidden; }
     const wrap = document.createElement('div'); wrap.className = 'lay';
     wrap.innerHTML = `<button type="button" class="lay-btn" aria-expanded="false" aria-controls="lay-menu">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
-      <span class="lay-t"></span></button><ul class="lay-menu" id="lay-menu" data-lenis-prevent hidden></ul>`;
+      <span class="lay-t"></span></button><ul class="lay-menu" id="lay-menu" hidden></ul>`;
     document.body.appendChild(wrap);
     const btn = wrap.querySelector('.lay-btn'); const menu = wrap.querySelector('.lay-menu');
     const here = new URL(location.href);

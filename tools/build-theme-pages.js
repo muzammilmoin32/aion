@@ -334,6 +334,9 @@ function openBanking(h) {
   return h;
 }
 
+// WhatsApp: the same placeholder number the glass section uses (swap in the real one in both places)
+const WHATSAPP = 'https://wa.me/000000000000';
+
 function page(withLines) {
   let h = theme;
   h = must(h, '<html lang="en">', '<html lang="en" dir="ltr" data-behind="off">', 'html tag');
@@ -374,10 +377,20 @@ function page(withLines) {
     <h1>Launch digital banking on the core you already have.</h1>
     <p class="hero-sub">Aion is the layer between a bank's core and its customers: ready journeys, 800+ banking APIs, open banking and AI. Built for Saudi Arabia and the GCC since 2017.</p>
     <div class="hero-ctas">
-      <a class="hero-cta" href="#book">Book a 20-minute walkthrough</a>
+      <button type="button" class="hero-cta" data-open-booking>Book a 20-minute walkthrough</button>
       <a class="hero-cta ghost" href="#demos"><span aria-hidden="true">▶</span> Watch a journey run</a>
     </div>
-    <p class="hero-micro"><span>Open banking licences · SAMA · CBB · FCA</span><span>Onboarding in under 5 minutes</span><a href="#book">or message us on WhatsApp</a></p>` + h.slice(hero.b);
+    <p class="hero-micro"><span>Open banking licences · SAMA · CBB · FCA</span><span>Onboarding in under 5 minutes</span><a href="${WHATSAPP}" target="_blank" rel="noopener">or message us on WhatsApp</a></p>` + h.slice(hero.b);
+  // conversion points (v2: "both on every page"): every Book button opens the two-field booking dialog, WhatsApp opens WhatsApp
+  h = must(h, '<a class="btn btn-primary" href="#book">Book a walkthrough</a>', '<button type="button" class="btn btn-primary" data-open-booking>Book a walkthrough</button>', 'header: Book opens the dialog');
+  h = must(h, '<a class="btn btn-primary" href="#book"><svg><use href="#i-cal"/></svg>Book a 20-minute walkthrough</a>', '<button type="button" class="btn btn-primary" data-open-booking><svg><use href="#i-cal"/></svg>Book a 20-minute walkthrough</button>', 'close: Book opens the dialog');
+  h = must(h, '<a class="btn btn-ghost" href="#book"><svg><use href="#i-chat"/></svg>Message us on WhatsApp</a>', `<a class="btn btn-ghost" href="${WHATSAPP}" target="_blank" rel="noopener"><svg><use href="#i-chat"/></svg>Message us on WhatsApp</a>`, 'close: WhatsApp link');
+  // 02 client logos: v2 placeholders until each client gives written OK (no invented bank names)
+  const logos = (h.match(/<div class="logo-ph">[^<]*<\/div>/g) || []).length;
+  if (logos < 6) { console.log('NOT FOUND: client logo placeholders'); problems += 1; }
+  h = h.replace(/<div class="logo-ph">[^<]*<\/div>/g, '<div class="logo-ph">[Client logo · written OK]</div>');
+  // footer: v2 keeps the compliance caveat visible
+  h = must(h, '<small>Licensed for open banking by SAMA, CBB and FCA</small>', '<small>Licensed by SAMA, CBB and FCA [wording to be checked by compliance]</small>', 'footer: licence wording');
   h = must(h, '</head>', `<style>
 /* hero, per wireframe v2 */
 .hero .pill { margin-bottom: clamp(16px, 2.6vh, 26px); }
@@ -385,47 +398,63 @@ function page(withLines) {
 .hero-ctas { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-top: clamp(24px, 4vh, 40px); }
 .hero-ctas .hero-cta { margin-top: 0; }
 .hero-cta.ghost { gap: 10px; background: rgb(255 255 255 / .08); color: #fff; border: 1px solid rgb(255 255 255 / .45); text-decoration: none; box-shadow: none; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
-.hero-cta.ghost span { font-size: 12px; }
-:root[dir="rtl"] .hero-cta.ghost span { display: inline-block; transform: scaleX(-1); }
+.hero-cta.ghost span { font-size: 12px; }   /* a play glyph: not mirrored in Arabic */
+button.hero-cta { border: 0; cursor: pointer; }
 .hero-micro { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 22px; margin: 22px 0 0; font-family: var(--font-mono); font-size: 12px; color: rgb(255 255 255 / .88); text-shadow: 0 1px 10px rgb(0 40 38 / .75), 0 0 2px rgb(0 40 38 / .6); }
 .hero-micro a { flex-basis: 100%; color: #fff; text-decoration: underline; text-underline-offset: 4px; }
 </style>
 </head>`, 'head end (hero)');
   /* smooth scroll (the theme's Lenis), made complete:
-     - panels that scroll on their own keep the wheel (the mobile menu; the layouts list opts out in layouts.js)
-     - the page holds still behind the full-screen mobile menu and the booking dialog
-     - keyboard scrolling glides like the wheel (arrows, Page Up/Down, Space, Home/End) */
-  h = must(h, '<div class="mega" id="mega" hidden>', '<div class="mega" id="mega" data-lenis-prevent hidden>', 'mega: lenis opt-out');
+     - a panel keeps the wheel only while it can scroll itself (phone menu, layouts list); otherwise the page glides
+     - the page holds still behind the full-screen phone menu and the booking dialog, without a sideways shift
+     - keyboard scrolling glides like the wheel (arrows, Page Up/Down, Space, Home/End), and repeated presses add up */
+  h = must(h, 'lenis = new Lenis({ duration:1.15,', "lenis = new Lenis({ prevent: n => !!(n.matches && n.matches('.mega-card, .lay-menu') && n.scrollHeight > n.clientHeight + 1), duration:1.15,", 'lenis: scrollable panels keep the wheel');
   h = must(h, "if (root.classList.contains('intro')) lenis.stop();", "if (root.classList.contains('intro')) lenis.stop();\n    window.__aionLenis = lenis;", 'lenis: shared');
+  // Solutions with a mouse: hovering opens the menu, so the click that follows must not toggle it shut again
+  h = must(h, "solBtn.addEventListener('click', e => { e.stopPropagation(); setMega(mega.hidden); });",
+    "let hoverOpenedAt = 0;\n  solBtn.addEventListener('click', e => { e.stopPropagation(); if (performance.now() - hoverOpenedAt < 700) { setMega(true); return; } setMega(mega.hidden); });", 'solutions: click after hover keeps it open');
+  h = must(h, "solBtn.addEventListener('mouseenter', () => { if (canHover){ clearTimeout(hoverT); setMega(true); } });",
+    "solBtn.addEventListener('mouseenter', () => { if (canHover){ clearTimeout(hoverT); if (mega.hidden) hoverOpenedAt = performance.now(); setMega(true); } });", 'solutions: remember when hover opened it');
+  h = must(h, '</head>', `<style>
+/* smooth scroll: panels do not hand their scroll on to the page; the scrollbar's space stays when the page is held */
+.mega-card, .lay-menu { overscroll-behavior: contain; }
+html.lenis { scrollbar-gutter: stable; }
+</style>
+</head>`, 'head end (smooth scroll)');
   h = must(h, '</body>', `<script>
 /* smooth scroll: hold the page behind full-screen layers; keyboard keys glide (built by tools/build-theme-pages.js) */
 (() => {
-  const L = () => window.__aionLenis;
-  if (!L()) return;   // reduced motion or no Lenis: the browser's own scrolling
-  const burger = document.getElementById('burger'), mega = document.getElementById('mega');
+  const lenis = window.__aionLenis;
+  if (!lenis) return;   // reduced motion or no Lenis: the browser's own scrolling
+  const root = document.documentElement, burger = document.getElementById('burger'), mega = document.getElementById('mega');
   const held = new Set();
+  // the theme restarts Lenis when its intro ends: never while something holds the page
+  const start = lenis.start.bind(lenis);
+  lenis.start = () => { if (!held.size) start(); };
   const hold = (why, on) => {
-    const lenis = L(); if (!lenis) return;
     if (on) held.add(why); else held.delete(why);
     if (held.size) lenis.stop();
-    else if (!document.documentElement.classList.contains('intro')) lenis.start();
+    else if (!root.classList.contains('intro')) start();
   };
-  const fullMenu = () => mega && !mega.hidden && burger && getComputedStyle(burger).display !== 'none';   // phone menu covers the page
-  if (mega) new MutationObserver(() => hold('menu', fullMenu())).observe(mega, { attributes: true, attributeFilter: ['hidden'] });
+  const fullMenu = () => !!(mega && !mega.hidden && burger && getComputedStyle(burger).display !== 'none');   // the phone menu covers the page
+  const checkMenu = () => hold('menu', fullMenu());
+  if (mega) new MutationObserver(checkMenu).observe(mega, { attributes: true, attributeFilter: ['hidden'] });
+  addEventListener('resize', checkMenu);   // rotating or resizing across the phone breakpoint with the menu open
   document.querySelectorAll('dialog').forEach((d) => new MutationObserver(() => hold('dialog:' + d.id, d.open)).observe(d, { attributes: true, attributeFilter: ['open'] }));
 
-  const SKIP = 'input, textarea, select, [contenteditable=""], [contenteditable="true"], [role="tablist"], [role="listbox"], [role="menu"], [role="slider"], .chips, .lay, #mega';
+  const SKIP = 'input, textarea, select, [contenteditable=""], [contenteditable="true"], [role="tablist"], [role="listbox"], [role="menu"], [role="slider"], [role="switch"], .chips, .lay, #mega';
   addEventListener('keydown', (e) => {
-    const lenis = L();
-    if (!lenis || lenis.isStopped || e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey) return;
+    if (lenis.isStopped || e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey) return;
     const t = e.target;
     if (t && t.closest && t.closest(SKIP)) return;                                                   // keys that belong to a control
-    if (e.key === ' ' && t && t.closest && t.closest('button, a, summary, [role="button"]')) return;  // Space presses the button
+    if (e.key === ' ' && t && t.closest && t.closest('button, summary, [role="button"]')) return;      // Space presses the button
     const step = innerHeight - 110;   // a screen, less the header and a little overlap
+    const line = e.repeat ? 70 : 140;  // a held arrow: about 2000 px/s, steady
+    // targetScroll is where the current glide is heading, so quick presses add up
     let to;
     switch (e.key) {
-      case 'ArrowDown': to = lenis.targetScroll + 140; break;
-      case 'ArrowUp': to = lenis.targetScroll - 140; break;
+      case 'ArrowDown': to = lenis.targetScroll + line; break;
+      case 'ArrowUp': to = lenis.targetScroll - line; break;
       case 'PageDown': to = lenis.targetScroll + step; break;
       case 'PageUp': to = lenis.targetScroll - step; break;
       case ' ': to = lenis.targetScroll + (e.shiftKey ? -step : step); break;
@@ -435,7 +464,7 @@ function page(withLines) {
     }
     if (e.shiftKey && e.key !== ' ') return;
     e.preventDefault();
-    lenis.scrollTo(Math.max(0, Math.min(lenis.limit, to)), { duration: e.repeat ? 0.3 : 0.9 });   // held key: short glides that keep up
+    lenis.scrollTo(Math.max(0, Math.min(lenis.limit, to)), { duration: e.repeat ? 0.3 : 0.9, programmatic: false });
   });
 })();
 </script>
