@@ -556,6 +556,18 @@ html.c-ondark body[data-scene="neural"] #cursor::after { border-color: #c9adff; 
 html.c-ondark body[data-scene="openbank"] #cursor::after { border-color: #9cc4ff; }
 </style>
 <style>
+/* hero, per wireframe v2 */
+.hero .pill { margin-bottom: clamp(16px, 2.6vh, 26px); }
+.hero-sub { max-width: 62ch; }
+.hero-ctas { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-top: clamp(24px, 4vh, 40px); }
+.hero-ctas .hero-cta { margin-top: 0; }
+.hero-cta.ghost { gap: 10px; background: rgb(255 255 255 / .08); color: #fff; border: 1px solid rgb(255 255 255 / .45); text-decoration: none; box-shadow: none; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+.hero-cta.ghost span { font-size: 12px; }
+:root[dir="rtl"] .hero-cta.ghost span { display: inline-block; transform: scaleX(-1); }
+.hero-micro { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 22px; margin: 22px 0 0; font-family: var(--font-mono); font-size: 12px; color: rgb(255 255 255 / .82); }
+.hero-micro a { flex-basis: 100%; color: #fff; text-decoration: underline; text-underline-offset: 4px; }
+</style>
+<style>
 /* Arabic: right to left in the theme's Arabic font */
 :root[dir="rtl"] { --font-body: var(--font-ar); --font-display: var(--font-ar); --font-mono: var(--font-ar); }
 /* letter spacing pulls Arabic letters apart: none anywhere in Arabic */
@@ -605,7 +617,6 @@ html.c-ondark body[data-scene="openbank"] #cursor::after { border-color: #9cc4ff
         <button id="solBtn" aria-expanded="false" aria-controls="mega">Solutions <svg><use href="#i-chev"/></svg></button>
         <a href="#ai966">Intelligence (Ai966)</a>
         <a href="#open-banking">Open Banking</a>
-        <a href="#fits">Platform</a>
         <a href="#proof">Company</a>
       </div>
       <div class="nav-right">
@@ -653,7 +664,6 @@ html.c-ondark body[data-scene="openbank"] #cursor::after { border-color: #9cc4ff
           <span class="eyebrow">More</span>
           <a class="mm-item" href="#ai966"><span><b>Intelligence (Ai966)</b></span></a>
           <a class="mm-item" href="#open-banking"><span><b>Open Banking</b></span></a>
-          <a class="mm-item" href="#fits"><span><b>Platform</b></span></a>
           <a class="mm-item" href="#proof"><span><b>Company</b></span></a>
           <div class="seg" role="group" aria-label="Lens" style="align-self:flex-start">
             <button data-lens-btn="business" aria-pressed="true">Business</button>
@@ -674,15 +684,14 @@ html.c-ondark body[data-scene="openbank"] #cursor::after { border-color: #9cc4ff
     <p class="hero-ar" lang="ar" dir="rtl">من السعودية إلى العالم</p>
   </div>
   <div class="hero-content wrap">
-    <h1>A three-owner LLC. Business account open on a phone.</h1>
-    <p class="hero-sub">Every owner approves through Nafath. The CR comes from Wathq.<br>No branch visit, no paper.</p>
-    <ul class="social" aria-label="Aion on social media">
-      <li><a href="#book" aria-label="Facebook">Facebook</a></li>
-      <li><a href="#book" aria-label="LinkedIn">LinkedIn</a></li>
-      <li><a href="#book" aria-label="Instagram">Instagram</a></li>
-      <li><a href="#book" aria-label="X">X</a></li>
-    </ul>
-    <a class="hero-cta" href="#book">Book a 20-min walkthrough</a>
+    <span class="pill"><span class="dot"></span>Running inside a Top 5 Saudi bank</span>
+    <h1>Launch digital banking on the core you already have.</h1>
+    <p class="hero-sub">Aion is the layer between a bank's core and its customers: ready journeys, 800+ banking APIs, open banking and AI. Built for Saudi Arabia and the GCC since 2017.</p>
+    <div class="hero-ctas">
+      <a class="hero-cta" href="#book">Book a 20-minute walkthrough</a>
+      <a class="hero-cta ghost" href="#demos"><span aria-hidden="true">▶</span> Watch a journey run</a>
+    </div>
+    <p class="hero-micro"><span>Open banking licences · SAMA · CBB · FCA</span><span>Onboarding in under 5 minutes</span><a href="#book">or message us on WhatsApp</a></p>
   </div>
   <div class="scroll-cue" aria-hidden="true">SCROLL<i></i></div>
 </section>
@@ -877,14 +886,14 @@ html.c-ondark body[data-scene="openbank"] #cursor::after { border-color: #9cc4ff
     <article class="card reveal" id="nums">
       <span class="eyebrow">In numbers</span>
       <div class="nums">
-        <div class="num"><strong data-count="9">9</strong><p>years in Saudi and GCC banking</p><small>Source · aiondigital.com/about-us</small></div>
+        <div class="num"><strong data-count="150" data-suffix="+">150+</strong><p>bankers, regulators, technologists and designers</p><small>Source · aiondigital.com/about-us</small></div>
         <div class="num"><strong data-count="800" data-suffix="+">800+</strong><p>banking APIs on one platform</p><small>Source · aiondigital.com/aion-rubix</small></div>
         <div class="num"><strong data-count="3">3</strong><p>open banking licences: SAMA, CBB and FCA</p><small>Source · SAMA, CBB and FCA registers</small></div>
-        <div class="num"><strong data-count="6">6</strong><p>months to a full SME banking business, about</p><small>Source · aiondigital.com/aion-rubix</small></div>
+        <div class="num"><strong data-count="5" data-suffix="x">5x</strong><p>faster release delivery, at best</p><small>Source · aiondigital.com/aion-rubix</small></div>
       </div>
-      <p class="offices">Riyadh · Manama · Karachi</p>
+      <p class="offices">Manama · Riyadh · Kuwait City · Dubai · Karachi</p>
     </article>
-    <div class="slot-col" aria-hidden="true"><div class="slot" id="slotNums" data-caption="9 years · 800+ APIs · 3 licences"></div></div>
+    <div class="slot-col" aria-hidden="true"><div class="slot" id="slotNums" data-caption="800+ APIs · 3 licences · 5x faster"></div></div>
   </div>
 </section>
 
@@ -894,7 +903,7 @@ html.c-ondark body[data-scene="openbank"] #cursor::after { border-color: #9cc4ff
     <article class="card demo-card reveal" id="demo">
       <span class="eyebrow">See it run · live demos</span>
       <h2 class="h2">Pick a journey. Watch it run.</h2>
-      <p class="lede">Every demo runs on a fictional reference bank, on the same layer a live bank uses.</p>
+      <p class="lede">Every demo runs on a fictional reference bank, on the same layer a live bank uses. Turn on what sits behind it to see each service fire.</p>
       <div class="jlist" role="tablist" aria-label="Journeys" id="jlist"></div>
       <div class="demo-body">
         <div class="phone-col">
@@ -948,7 +957,7 @@ html.c-ondark body[data-scene="openbank"] #cursor::after { border-color: #9cc4ff
     <article class="card reveal">
       <div class="ob-logo"><img src="../assets/spire-logo.png" alt="Spire for open banking" width="400" height="158"></div>
       <span class="eyebrow">Open Banking · Spire</span>
-      <h2 class="h2">One API to the banks your customers already use.</h2>
+      <h2 class="h2">Twelve months of bank statements become a cash-flow statement in seconds.</h2>
       <p class="lede">Spire Technologies is an investment of Aion Digital, building an API financial ecosystem in the MENA region and preparing banks for the next big challenge: open banking.</p>
       <p class="ob-p">Our technology, AI and banking experts make it happen through connected open banking API platforms, knowledge sharing and global expert collaborations.</p>
       <div class="stats">
@@ -971,8 +980,8 @@ html.c-ondark body[data-scene="openbank"] #cursor::after { border-color: #9cc4ff
   <div class="wrap split rev">
     <article class="card reveal">
       <span class="eyebrow">Proof</span>
-      <p class="quote">“We opened business accounts for multi-owner LLCs with no branch visit and no paper. Our RMs now call customers before the problem, not after.”</p>
-      <div class="who"><i></i><div><b>Head of SME Banking</b><span>Placeholder · publish only with a named executive’s written approval</span></div></div>
+      <p class="quote">“[One short quote from a named bank executive, if approved.]”</p>
+      <div class="who"><i></i><div><b>[Name]</b><span>[Title], [Bank]</span></div></div>
       <span class="eyebrow sub">Recognition</span>
       <div class="awards" id="awards">
         <div class="award"><b>Best Banking Technology Provider, Middle East</b><small>2023 · 24 · 25</small><span>Global Banking and Finance Awards</span></div>
@@ -1022,7 +1031,7 @@ html.c-ondark body[data-scene="openbank"] #cursor::after { border-color: #9cc4ff
   <div class="wrap foot">
     <div>
       <a class="logo" href="#top"><img class="lt" alt="" src="data:image/png;base64,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">aion</a>
-      <p>Riyadh · Manama · Karachi</p>
+      <p>Manama · Riyadh · Kuwait City · Dubai · Karachi</p>
       <small>Licensed for open banking by SAMA, CBB and FCA</small>
     </div>
     <nav aria-label="Footer"><a href="#what">Solutions</a><a href="#fits">Platform</a><a href="#ai966">Intelligence</a><a href="#open-banking">Open Banking</a><a href="#proof">Company</a><a href="#proof">Careers</a><a href="#book">Contact</a></nav>
@@ -1854,21 +1863,21 @@ const PALETTES = {
         ['Approve','Checker approves',[['Checker','Approved'],['Rule','Under limit']],'Approval follows the company’s rules','approval.rules','1 tap'],
         ['Pay','Paid through SADAD',[['Status','Settled'],['Reference','SD-XXXXXX']],'SADAD settles each bill','sadad.pay','1.2s'],
         ['Receipts','Receipts filed',[['Receipts','6 saved'],['ERP','Synced']],'Receipts filed and synced to the ERP','erp.sync','0.6s']] },
-    { tag:'SME', wave:'Wave 2', icon:'i-card', name:'SME card and spend', d:'Cards for five staff, limits by category, synced to the ERP.', kpi:'Cards live in: 4 minutes',
+    { tag:'SME', wave:'Wave 2', icon:'i-card', name:'SME cards and spend', d:'Cards for five staff, limits by category, synced to the ERP.', kpi:'Cards live in: 4 minutes',
       steps:[['Request','Cards for 5 staff',[['Staff','5 selected'],['Type','Virtual + physical']],'Owner picks who gets a card','cards.request','0.2s'],
         ['Limits','Set limits',[['Monthly','SAR 5,000 each'],['Per payment','SAR 1,500']],'Limits set per person','limits.set','—'],
         ['Rules','Category rules',[['Fuel','Allowed'],['Travel','Approval needed']],'Spend rules by category','rules.mcc','—'],
         ['Issue','Cards issued',[['Virtual','Issued'],['Physical','On the way']],'Virtual cards usable now','cards.issue','1.0s'],
         ['ERP','ERP synced',[['Ledger','Mapped'],['Receipts','Auto-match']],'Every swipe lands in the ERP','erp.sync','0.7s'],
         ['Live','Spend live',[['Today','SAR 2,140'],['Alerts','On']],'Owner sees spend as it happens','spend.stream','live']] },
-    { tag:'Open banking', wave:'Wave 1', icon:'i-chart', name:'Cash-flow lending', d:'Credit decided on how the business actually trades.', kpi:'Decision time: 40 seconds',
+    { tag:'Open banking', wave:'Wave 1', icon:'i-chart', name:'SME cash-flow lending', d:'Credit decided on how the business actually trades.', kpi:'Decision time: 40 seconds',
       steps:[['Consent','Share your bank data',[['Banks','2 connected'],['Period','12 months']],'Owner consents to share statements','ob.consent','0.3s'],
         ['Fetch','12 months fetched',[['Transactions','14,208'],['Accounts','3']],'Statements arrive over open banking','ob.accounts.fetch','2.1s'],
         ['Statement','Cash-flow statement',[['Average inflow','SAR 412k a month'],['Volatility','Low']],'Twelve months, one statement, seconds','cashflow.statement','1.4s'],
         ['Decision','Credit decision',[['Score','A-'],['Limit','SAR 750,000']],'Credit decided on real trading','credit.decision','0.8s'],
         ['Offer','Offer accepted',[['Rate','6.5%'],['Term','12 months']],'Owner accepts on the phone','offer.issue','—'],
         ['Funds','Funds disbursed',[['Status','Disbursed'],['To','Operating account']],'Funds land in the account','core.disburse','0.9s']] },
-    { tag:'AI', wave:'Wave 1', icon:'i-spark', name:'RM early warning (AI)', d:'The SME will miss payroll in 60 days. The RM knows today.', kpi:'Days of warning: 58',
+    { tag:'AI', wave:'Wave 1', icon:'i-spark', name:'RM early warning', d:'The SME will miss payroll in 60 days. The RM knows today.', kpi:'Days of warning: 58',
       steps:[['Signals','Overnight signals',[['Accounts read','42,000'],['New signals','118']],'Ai966 reads last night’s transactions','ai966.ingest','batch'],
         ['Risk','Payroll risk found',[['Customer','Al Waha Contracting'],['Shortfall','in 58 days']],'Receivables slowed three months in a row','ai966.payroll_risk','0.6s'],
         ['Notify','RM notified',[['RM','Morning list'],['Priority','High']],'It lands on the RM’s morning list','rm.notify','08:00'],

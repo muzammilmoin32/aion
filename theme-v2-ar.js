@@ -119,6 +119,9 @@ window.THEME_V2_AR = {
   'Source · aiondigital.com/aion-rubix': 'المصدر · aiondigital.com/aion-rubix',
   'Source · SAMA, CBB and FCA registers': 'المصدر · سجلات ساما ومصرف البحرين المركزي وFCA',
   'Riyadh · Manama · Karachi': 'الرياض · المنامة · كراتشي',
+  'Manama · Riyadh · Kuwait City · Dubai · Karachi': 'المنامة · الرياض · مدينة الكويت · دبي · كراتشي',
+  'bankers, regulators, technologists and designers': 'مصرفي وخبير تنظيمي وتقني ومصمم',
+  'faster release delivery, at best': 'أسرع في إطلاق الإصدارات، في أفضل الحالات',
 
   /* ---------- 06 demos ---------- */
   'See it run · live demos': 'شاهدها تعمل · عروض حية',
@@ -318,6 +321,21 @@ window.THEME_V2_AR = {
   'Three owners plug into one account': 'ثلاثة شركاء في حساب واحد',
   'Wave terrain': 'تضاريس الموجة',
   'Live demo': 'عرض مباشر',
+  // wireframe v2: hero, demos, proof
+  'Running inside a Top 5 Saudi bank': 'يعمل داخل أحد أكبر خمسة بنوك سعودية',
+  'Launch digital banking on the core you already have.': 'أطلق خدماتك المصرفية الرقمية على النظام الأساسي الذي تملكه اليوم.',
+  "Aion is the layer between a bank's core and its customers: ready journeys, 800+ banking APIs, open banking and AI. Built for Saudi Arabia and the GCC since 2017.": 'Aion هي الطبقة بين النظام الأساسي للبنك وعملائه: رحلات جاهزة، وأكثر من 800 واجهة برمجة مصرفية، والمصرفية المفتوحة، والذكاء الاصطناعي. مصممة للسعودية ودول الخليج منذ 2017.',
+  'Watch a journey run': 'شاهد رحلة قيد التشغيل',
+  'Open banking licences · SAMA · CBB · FCA': 'تراخيص المصرفية المفتوحة · ساما · مصرف البحرين المركزي · FCA',
+  'Onboarding in under 5 minutes': 'فتح الحساب في أقل من 5 دقائق',
+  'or message us on WhatsApp': 'أو راسلنا عبر واتساب',
+  'Every demo runs on a fictional reference bank, on the same layer a live bank uses. Turn on what sits behind it to see each service fire.': 'كل عرض يعمل على بنك مرجعي افتراضي، وعلى الطبقة نفسها التي يستخدمها بنك فعلي. فعّل ما خلفه لترى كل خدمة وهي تعمل.',
+  'RM early warning': 'الإنذار المبكر لمدير العلاقة',
+  'SME cards and spend': 'بطاقات المنشآت والإنفاق',
+  '“[One short quote from a named bank executive, if approved.]”': '«[اقتباس قصير من مسؤول تنفيذي مُسمّى في بنك، بعد الموافقة.]»',
+  '[Name]': '[الاسم]',
+  '[Title], [Bank]': '[المنصب]، [البنك]',
+  'Twelve months of bank statements become a cash-flow statement in seconds.': 'كشوف حساب اثني عشر شهرًا تتحول إلى قائمة تدفقات نقدية في ثوانٍ.',
   // open banking section (Spire)
   'Open Banking · Spire': 'المصرفية المفتوحة · Spire',
   'Spire for open banking': 'Spire للمصرفية المفتوحة',

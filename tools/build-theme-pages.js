@@ -250,7 +250,7 @@ const OB_SECTION = `
     <article class="card reveal">
       <div class="ob-logo"><img src="../assets/spire-logo.png" alt="Spire for open banking" width="400" height="158"></div>
       <span class="eyebrow">Open Banking · Spire</span>
-      <h2 class="h2">One API to the banks your customers already use.</h2>
+      <h2 class="h2">Twelve months of bank statements become a cash-flow statement in seconds.</h2>
       <p class="lede">Spire Technologies is an investment of Aion Digital, building an API financial ecosystem in the MENA region and preparing banks for the next big challenge: open banking.</p>
       <p class="ob-p">Our technology, AI and banking experts make it happen through connected open banking API platforms, knowledge sharing and global expert collaborations.</p>
       <div class="stats">
@@ -359,23 +359,47 @@ function page(withLines) {
   h = must(h, '</head>', `${PLAYER6_CSS}\n</head>`, 'head end (section 06 video)');
   h = openBanking(h);
 
-  /* --- checked against the script (Aion Website The Script.docx) --- */
-  // navigation: five top-level items (Solutions, Intelligence, Open Banking, Platform, Company); the theme had no Platform
+  /* --- checked against the wireframe (Aion website wireframe v2.pdf) ---
+     The theme already follows v2 for the Solutions menu, What Aion does, How it fits, the four numbers (150+, 800+, 3, 5x),
+     the demos, Ai966, recognition, shipped, the close and the five offices. Changed here: */
+  // top bar: Solutions ▾ · Intelligence (Ai966) · Open Banking · Company. Platform lives in the Solutions menu, not the bar.
   // Open Banking goes to its own section (desktop, mobile menu, footer)
-  h = must(h, '<a href="#fits">Open Banking</a>\n        <a href="#proof">Company</a>', '<a href="#open-banking">Open Banking</a>\n        <a href="#fits">Platform</a>\n        <a href="#proof">Company</a>', 'nav: Platform link');
-  h = must(h, '<a class="mm-item" href="#fits"><span><b>Open Banking</b></span></a>', '<a class="mm-item" href="#open-banking"><span><b>Open Banking</b></span></a>\n          <a class="mm-item" href="#fits"><span><b>Platform</b></span></a>', 'mobile menu: Platform link');
+  h = must(h, '<a href="#fits">Open Banking</a>\n        <a href="#proof">Company</a>', '<a href="#open-banking">Open Banking</a>\n        <a href="#proof">Company</a>', 'nav: Open Banking link');
+  h = must(h, '<a class="mm-item" href="#fits"><span><b>Open Banking</b></span></a>', '<a class="mm-item" href="#open-banking"><span><b>Open Banking</b></span></a>', 'mobile menu: Open Banking link');
   h = must(h, '<a href="#ai966">Intelligence</a><a href="#fits">Open Banking</a>', '<a href="#ai966">Intelligence</a><a href="#open-banking">Open Banking</a>', 'footer: Open Banking link');
-  // Scroll 3: the script's four numbers (9 years, 800+ APIs, 3 licences, an SME bank live in about 6 months)
-  h = must(h, '<div class="num"><strong data-count="150" data-suffix="+">150+</strong><p>bankers, regulators, technologists and designers</p><small>Source · aiondigital.com/about-us</small></div>',
-    '<div class="num"><strong data-count="9">9</strong><p>years in Saudi and GCC banking</p><small>Source · aiondigital.com/about-us</small></div>', 'numbers: 9 years');
-  h = must(h, '<div class="num"><strong data-count="5" data-suffix="x">5x</strong><p>faster release delivery, at best</p><small>Source · aiondigital.com/aion-rubix</small></div>',
-    '<div class="num"><strong data-count="6">6</strong><p>months to a full SME banking business, about</p><small>Source · aiondigital.com/aion-rubix</small></div>', 'numbers: 6 months');
-  h = must(h, 'data-caption="800+ APIs · 3 licences · 5x faster"', 'data-caption="9 years · 800+ APIs · 3 licences"', 'numbers caption');
-  // footer and numbers: the script's offices (Riyadh, Manama, Karachi)
-  if (h.split('Manama · Riyadh · Kuwait City · Dubai · Karachi').length !== 3) { console.log('NOT FOUND: offices (expected 2)'); problems += 1; }
-  h = h.split('Manama · Riyadh · Kuwait City · Dubai · Karachi').join('Riyadh · Manama · Karachi');
-  // Scroll 4: "never an anonymous quote": mark it as a placeholder until a named executive approves one
-  h = must(h, '<span>A Top 5 Saudi bank · sample quote</span>', '<span>Placeholder · publish only with a named executive’s written approval</span>', 'proof: quote label');
+  // 01 hero: the home H1 and its lines (the theme opened on a demo line, which v2 moves to section 06)
+  const hero = cut(h, '<div class="hero-content wrap">', 'Book a 20-min walkthrough</a>', 'hero content');
+  if (hero) h = h.slice(0, hero.a) + `<div class="hero-content wrap">
+    <span class="pill"><span class="dot"></span>Running inside a Top 5 Saudi bank</span>
+    <h1>Launch digital banking on the core you already have.</h1>
+    <p class="hero-sub">Aion is the layer between a bank's core and its customers: ready journeys, 800+ banking APIs, open banking and AI. Built for Saudi Arabia and the GCC since 2017.</p>
+    <div class="hero-ctas">
+      <a class="hero-cta" href="#book">Book a 20-minute walkthrough</a>
+      <a class="hero-cta ghost" href="#demos"><span aria-hidden="true">▶</span> Watch a journey run</a>
+    </div>
+    <p class="hero-micro"><span>Open banking licences · SAMA · CBB · FCA</span><span>Onboarding in under 5 minutes</span><a href="#book">or message us on WhatsApp</a></p>` + h.slice(hero.b);
+  h = must(h, '</head>', `<style>
+/* hero, per wireframe v2 */
+.hero .pill { margin-bottom: clamp(16px, 2.6vh, 26px); }
+.hero-sub { max-width: 62ch; }
+.hero-ctas { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-top: clamp(24px, 4vh, 40px); }
+.hero-ctas .hero-cta { margin-top: 0; }
+.hero-cta.ghost { gap: 10px; background: rgb(255 255 255 / .08); color: #fff; border: 1px solid rgb(255 255 255 / .45); text-decoration: none; box-shadow: none; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+.hero-cta.ghost span { font-size: 12px; }
+:root[dir="rtl"] .hero-cta.ghost span { display: inline-block; transform: scaleX(-1); }
+.hero-micro { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 22px; margin: 22px 0 0; font-family: var(--font-mono); font-size: 12px; color: rgb(255 255 255 / .82); }
+.hero-micro a { flex-basis: 100%; color: #fff; text-decoration: underline; text-underline-offset: 4px; }
+</style>
+</head>`, 'head end (hero)');
+  // 06 demos: the v2 intro line and journey names
+  h = must(h, '<p class="lede">Every demo runs on a fictional reference bank, on the same layer a live bank uses.</p>', '<p class="lede">Every demo runs on a fictional reference bank, on the same layer a live bank uses. Turn on what sits behind it to see each service fire.</p>', 'demos intro');
+  h = must(h, "name:'Cash-flow lending'", "name:'SME cash-flow lending'", 'journey name: SME cash-flow lending');
+  h = must(h, "name:'RM early warning (AI)'", "name:'RM early warning'", 'journey name: RM early warning');
+  h = must(h, "name:'SME card and spend'", "name:'SME cards and spend'", 'journey name: SME cards and spend');
+  // 08 proof: v2 keeps the quote empty until a named bank executive approves one
+  const quote = cut(h, '<p class="quote">', '</p>', 'proof quote');
+  if (quote) h = h.slice(0, quote.a) + '<p class="quote">“[One short quote from a named bank executive, if approved.]”</p>' + h.slice(quote.b);
+  h = must(h, '<b>Head of SME Banking</b><span>A Top 5 Saudi bank · sample quote</span>', '<b>[Name]</b><span>[Title], [Bank]</span>', 'proof: quote attribution');
   // "Arabic from day one": the عربي button switches the page (theme-v2-i18n.js) instead of the theme's "not yet" toast
   h = must(h, "document.getElementById('langBtn').addEventListener('click', () => say('The Arabic mirror lives at /ar/ (right to left). Not part of this mockup yet.'));", '/* عربي: handled by theme-v2-i18n.js */', 'theme lang toast');
   h = must(h, '</head>', `<style>

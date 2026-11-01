@@ -11,7 +11,7 @@ let fails = 0;
 const ok = (c, msg) => { console.log((c ? 'PASS ' : 'FAIL ') + msg); if (!c) fails++; };
 const PAGES = ['landing-e', 'landing-f'];
 const TITLE = 'Aion v2 Homepage';
-const NAV = ['Solutions', 'Intelligence (Ai966)', 'Open Banking', 'Platform', 'Company'];
+const NAV = ['Solutions', 'Intelligence (Ai966)', 'Open Banking', 'Company'];   // wireframe v2: Platform sits in the Solutions menu
 
 // In-page helpers, installed before any page script runs.
 function helpers() {
@@ -119,7 +119,7 @@ function helpers() {
       ok(s.title === TITLE, `${pg} document.title "${s.title}"`);
       ok(s.layBtn, `${pg} .lay-btn present`);
       ok(s.embed === 'hero' && s.dir === 'ltr', `${pg} body[data-embed=hero], starts LTR (${s.embed}, ${s.dir})`);
-      ok(JSON.stringify(s.nav) === JSON.stringify(NAV), `${pg} desktop nav is the 5 items incl. Platform (${s.nav.join(' | ')})`);
+      ok(JSON.stringify(s.nav) === JSON.stringify(NAV), `${pg} desktop nav is the 4 v2 items, no Platform tab (${s.nav.join(' | ')})`);
       ok(JSON.stringify(s.mobile) === JSON.stringify(NAV.slice(1)), `${pg} mobile .mm-mobile lists the same items (Solutions = the menu itself) (${s.mobile.join(' | ')})`);
       const bt = await btnState(p);
       ok(bt.html === '<span lang="ar">عربي</span>' && bt.lang === null && bt.label === 'Switch to Arabic', `${pg} EN #langBtn markup ${JSON.stringify(bt)}`);
@@ -132,10 +132,10 @@ function helpers() {
         return { nums: [...document.querySelectorAll('#numbers .nums strong')].map((e) => e.textContent.trim()), text: document.getElementById('numbers').textContent,
           offices: document.querySelector('#numbers .offices').textContent.trim(), quoteLabel: q ? q.parentElement.querySelector('.who span').textContent.trim() : null };
       });
-      ok(JSON.stringify(n.nums) === '["9","800+","3","6"]', `${pg} numbers are 9, 800+, 3, 6 (${n.nums.join(', ')})`);
-      ok(!/150\+/.test(n.text) && !/\b5x\b/i.test(n.text), `${pg} numbers section has no 150+ / 5x`);
-      ok(n.offices === 'Riyadh · Manama · Karachi', `${pg} offices "${n.offices}"`);
-      ok(/placeholder/i.test(n.quoteLabel || ''), `${pg} quote label says placeholder ("${n.quoteLabel}")`);
+      // wireframe v2: the four numbers, the five offices, the quote left as a placeholder until approved
+      ok(JSON.stringify(n.nums) === '["150+","800+","3","5x"]', `${pg} numbers are the v2 four: 150+, 800+, 3, 5x (${n.nums.join(', ')})`);
+      ok(n.offices === 'Manama · Riyadh · Kuwait City · Dubai · Karachi', `${pg} offices "${n.offices}"`);
+      ok(n.quoteLabel === '[Title], [Bank]', `${pg} quote is the v2 placeholder ("${n.quoteLabel}")`);
 
       // ---------- Arabic ----------
       await p.evaluate(() => scrollTo(0, 0)); await p.waitForTimeout(300);
@@ -208,7 +208,7 @@ function helpers() {
       ok(await overflow(p) <= 0, `${pg} 390 EN no horizontal overflow (${await overflow(p)}px)`);
       await p.click('#burger'); await p.waitForTimeout(400);
       const mob = await p.evaluate(() => [...document.querySelectorAll('.mm-mobile a.mm-item')].filter((a) => a.getClientRects().length && a.getBoundingClientRect().width > 0).map((a) => a.textContent.trim()));
-      ok(mob.includes('Platform'), `${pg} 390 open menu shows Platform (${mob.join(' | ')})`);
+      ok(!mob.includes('Platform') && mob.includes('Open Banking'), `${pg} 390 open menu: v2 items, no Platform tab (${mob.join(' | ')})`);
       await p.keyboard.press('Escape'); await p.waitForTimeout(300);
       await toLang(p, 'ar');
       const s = await p.evaluate(() => ({ dir: document.documentElement.dir, copy1: (document.querySelector('#tilt .copy-1') || {}).textContent || '', left: __t.leftovers() }));
