@@ -45,7 +45,8 @@ const settled = (ys) => ys[ys.length - 1];
 
     // anchors from the header land under it
     for (const id of ['ai966', 'open-banking', 'demos']) {
-      const sel = id === 'demos' ? 'a[href="#demos"]' : `header a[href="#${id}"]`;
+      if (id === 'demos') { await p.evaluate(() => window.__aionLenis.scrollTo(0, { immediate: true })); await p.waitForTimeout(400); }
+      const sel = id === 'demos' ? '.hero-cta.ghost' : `header a[href="#${id}"]`;
       await p.locator(sel).first().click();
       await p.waitForTimeout(1800);
       const top = await p.evaluate((i) => document.getElementById(i).getBoundingClientRect().top, id);
